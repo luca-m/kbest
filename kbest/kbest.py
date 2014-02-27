@@ -10,12 +10,12 @@
   Knapsack Problem (http://dx.doi.org/10.1590/S0101-74382000000100011)'
 '''
 import string
+import re
 import numpy as np
 import argparse
 import logging
 
 LOGGER=logging.getLogger()
-LOGGER.setLevel(logging.DEBUG)
 
 #
 # Utilities
@@ -92,9 +92,9 @@ class Problem(object):
   '''
   
   @staticmethod
-  def newMatrixRepresentation(problem):
-    assert issubclass(type(problem), Problem)
-    M=np.empty((problem.b+1, problem.n+1), dtype=int)
+  def newMatrixRepresentation(prob):
+    assert issubclass(type(prob), Problem)
+    M=np.empty((prob.b+1, prob.n+1), dtype=int)
     M[:]=-1
     M[0,:]=-2
     M[:,0]=-2
@@ -103,16 +103,22 @@ class Problem(object):
   @staticmethod
   def problemFromFile(filePath):
     with open(filePath,'r') as f:
-      fields=[string.strip(x).replace('\t',' ') for x in f.read().split('\n')]
       prob=Problem(nvar=0,b=0)
-      prob.n=int(fields[0])
-      for i in xrange(1,prob.n+1):
-        _,c,a=fields[i].split(' ')
-        c=int(c)
-        a=int(a)
-        prob.addVariable(self, c, a)
-      prob.b=int(fields[prob.n+1])
-      return prob
+      line=f.readline()
+      line=f.readline()
+      varn=0
+      while line:
+        line=line.replace('\t',' ').strip()
+        try:
+          _,c,a=re.split(' *',line)
+          c=int(c)
+          a=int(a)
+          prob.addVariable(c, a)
+          varn+=1
+          line=f.readline()
+        except:
+          prob.b=int(line.replace('\t',' ').strip())
+          return prob
 
   def __init__(self, nvar=0, b=0):
     self.n=nvar
@@ -124,7 +130,6 @@ class Problem(object):
     self.a=np.append(self.a,[weight],0)
     self.c=np.append(self.c,[cost],0)
     self.n+=1
-
 
   def __str__(self):
     return str(self.__dict__)
@@ -265,7 +270,8 @@ class KBestSolver(object):
             self._backtracking(current_sol, g, alternative=False)
             self.L[g].C=True
             self.L[g].setDecisionVars(self.L[sol_index].getDecisionVars()+current_sol.getDecisionVars())
-            logging.debug(''.join(('searchAltSol: alternative sol!\n  current_sol.V={}, current_sol.X={}\n  ',
+            if LOGGER.isEnabledFor(logging.DEBUG):
+              LOGGER.debug(''.join(('searchAltSol: alternative sol!\n  current_sol.V={}, current_sol.X={}\n  ',
                            'L[{}].V={}, L[i].X={}\n  ',
                            'L[{}].V={}, L[g].X={}')).format(current_sol.V, current_sol.getDecisionVars(), 
                                           sol_index, self.L[sol_index].V, self.L[sol_index].getDecisionVars(), 
@@ -294,13 +300,15 @@ class KBestSolver(object):
     j1=j
     z=current_sol.V
     zcum=0
-    logging.debug('backtracking current_sol: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
+    if LOGGER.isEnabledFor(logging.DEBUG):
+      LOGGER.debug('backtracking current_sol: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
     while t>0:
       t-=self.prob.a[j]
       z-=self.prob.c[j]
       zcum+=self.prob.c[j]
       current_sol.X[j]+=1
-      logging.debug('backtracking current_sol: j={}, auxj.X={}'.format(j,current_sol.getDecisionVars()))
+      if LOGGER.isEnabledFor(logging.DEBUG):
+        LOGGER.debug('backtracking current_sol: j={}, auxj.X={}'.format(j,current_sol.getDecisionVars()))
       if z==0:
         #logging.debug('backtracking root: t={}, z={}, j={}, M[t,:]={}'.format(t,z,j,self.M[t,:]))
         break
@@ -309,7 +317,8 @@ class KBestSolver(object):
       for jj in xrange(1,j+1):
         if self.M[t,jj]==z:
           j=jj
-          logging.debug('backtracking sol: z={} found at {} in M[{},{}]={}'.format(z,j,t,j,self.M[t,1:]))
+          if LOGGER.isEnabledFor(logging.DEBUG):
+            LOGGER.debug('backtracking sol: z={} found at {} in M[{},{}]={}'.format(z,j,t,j,self.M[t,1:]))
       if t>0 and alternative:
         self._searchAltSol(t, j, zcum, j1, sol_index)
       j1=j
@@ -452,7 +461,6 @@ class KBestSolver(object):
     '''
     #logging.debug('forward: '.format())
     self.M[0,1:]=0
-
     for j in xrange(1,prob.n+1):
       self.M[self.prob.a[j],j]=self.prob.c[j]
     #logging.debug('Matrix before forward enumeration:\n{}'.format(M[0:,1:])) 
@@ -460,12 +468,14 @@ class KBestSolver(object):
     for t in xrange(self.prob.a[1], self.prob.b-self.prob.a[1]+1):
       
       valid_values=self.M[t,:]>=0
-      if len(valid_values)>0:
+      if True in valid_values:
         tmp=np.where(valid_values)
         m=min(tmp[0])
-        logging.debug('forward: M[{},:]={} min found at {}'.format(t,self.M[t,1:],m,tmp))
+        if LOGGER.isEnabledFor(logging.DEBUG):
+          LOGGER.debug('forward: M[{},:]={} min found at {}'.format(t,self.M[t,1:],m,tmp))
       else:
-        logging.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,self.M[t,1:]))
+        if LOGGER.isEnabledFor(logging.DEBUG):
+          LOGGER.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,self.M[t,1:]))
         continue
       
       z=self.M[t,m]
@@ -489,7 +499,8 @@ class KBestSolver(object):
     self.prob=prob
     self.M=Problem.newMatrixRepresentation(self.prob)
     self._forward()
-    logging.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+    if LOGGER.isEnabledFor(logging.DEBUG):
+      LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
     self._backtrack()
     return list(self.L[:self.k+1])
     #return list(self.L)
@@ -508,21 +519,39 @@ def get_sample_problem():
   prob.b=15
   return prob
 
+def pretty_print(prob, slist):
+  assert issubclass(type(prob), Problem)
+  print('Problem:')
+  print('nvar={} capacity={}'.format(prob.n,prob.b))
+  print('{}-best solutions:'.format(len(slist)))
+  for sol in slist:
+    print('value={} vars={}'.format(sol.V,sol.getDecisionVars()))
+
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('--sample',help='run with sample problem', action='store_true')
+  parser.add_argument('-v',help='Verbose output', action='store_true')
   parser.add_argument('-k',help='Number of best solution to retrieve', type=int, default=5)
-  parser.add_argument('prob',help='Text file containing problem data', default=None, action='store')
+  parser.add_argument('prob',help='Text file containing problem data', 
+                      default=[], nargs='*', action='store')
   args = parser.parse_args()
 
+  if args.v:
+    LOGGER.setLevel(logging.DEBUG)
+  else:
+    LOGGER.setLevel(logging.WARNING)
+
+  problems=list()
+
   if args.sample is True:
-    prob=get_sample_problem()
-  else: 
-    prob=Problem.problemFromFile(args.prob)
+    problems.append(get_sample_problem())
+  else:
+    for p in args.prob:
+      problems.append(Problem.problemFromFile(p))
 
   kbs=KBestSolver()
-  L=kbs.kbest(prob, args.k)
-  print('Best {} Solutions:'.format(len(L)))
-  for sol in L:
-    print('X: {} V: {} '.format(sol.getDecisionVars(),sol.V))
+  for prob in problems:
+    L=kbs.kbest(prob, args.k)
+    pretty_print(prob,L)
+
 
