@@ -322,7 +322,7 @@ class KBestSolver(object):
     ''' 
     Build the initial K-Best solution 
     '''
-    L=list1()
+    self.L=list1()
     counter=0
     i=self.prob.b+1
     fim=False
@@ -369,7 +369,7 @@ class KBestSolver(object):
           moreleft=False
         while j>1:
           j-=1
-          if self.M[i,j]>L[self.p].V:
+          if self.M[i,j]>self.L[self.p].V:
             
             sol=SolInfo(problem=self.prob)
             sol.V=self.M[i,j]
@@ -387,7 +387,7 @@ class KBestSolver(object):
               i=0; j=0
       p1=counter
       L1=SolInfo.sortNonIncreasing(L1)
-      if len(L1)>0 and L1[1].V>L[self.k].V:
+      if len(L1)>0 and L1[1].V>self.L[self.k].V:
 
         # Merging:
         # Using L and L1 build sorted list of k objects having largest value V 
@@ -396,16 +396,16 @@ class KBestSolver(object):
         x=1; y=1; z=1
         mergedL=list1()
         while x<len(L)+1 and y<len(L1)+1 and z<self.k+1:
-          if L[x].V>L1[y].V:
-            sol=L[x]; x+=1
+          if self.L[x].V>L1[y].V:
+            sol=self.L[x]; x+=1
           else:
             sol=L1[y]; y+=1
           #if sol:# not in mergedL:
           mergedL.append(sol)
           z+=1
         while x<len(L)+1 and z<self.k+1:
-          #if L[x]:# not in mergedL:
-          mergedL.append(L[x]); z+=1
+          #if self.L[x]:# not in mergedL:
+          mergedL.append(self.L[x]); z+=1
           x+=1
         while y<len(L1)+1 and z<self.k+1:
           #if L1[y]:# not in mergedL:
@@ -413,17 +413,17 @@ class KBestSolver(object):
           y+=1
         
         for xx in xrange(1,self.k+1):
-          L[xx]=mergedL[xx]
+          self.L[xx]=mergedL[xx]
         
         #logging.debug('buildInitKBest: i1={}, a1={}, j1={}'.format(i1,prob.a[1],j1))
         if i1>self.prob.a[1] or j1>1:
           fim=True
     
     for i in xrange(1, self.p+1):
-      L[i].X=np.zeros((self.prob.n+1))
-      L[i].C=False
+      self.L[i].X=np.zeros((self.prob.n+1))
+      self.L[i].C=False
 
-    self.L=L
+    self.L
 
   def _backtrack(self):
     ''' 
