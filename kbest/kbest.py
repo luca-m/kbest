@@ -512,7 +512,7 @@ if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('--sample',help='run with sample problem', action='store_true')
   parser.add_argument('-k',help='Number of best solution to retrieve', type=int, default=5)
-  parser.add_argument('prob',help='Text file containing problem data',action='store')
+  parser.add_argument('prob',help='Text file containing problem data', default=None, action='store')
   args = parser.parse_args()
 
   if args.sample is True:
