@@ -3,6 +3,8 @@
 # vim:fenc=utf-8
 #
 '''
+  @module KBest
+
   Implementation of the algorithm for solving 1-dimensional K-best Knapsack problem described in:
   'Yanasse, Soma, Maculan - An Algorithm For Determining The K-Best Solutions Of The One-Dimensional
   Knapsack Problem (http://dx.doi.org/10.1590/S0101-74382000000100011)'
@@ -15,6 +17,28 @@ import logging
 LOGGER=logging.getLogger()
 LOGGER.setLevel(logging.DEBUG)
 
+#
+# Utilities
+#
+
+def reverse_bisect(a, x, lo=0, hi=None):
+    """Insert item x in list a, and keep it reverse-sorted assuming a
+    is reverse-sorted.
+
+    If x is already in a, insert it to the right of the rightmost x.
+
+    Optional args lo (default 0) and hi (default len(a)) bound the
+    slice of a to be searched.
+    """
+    if lo < 0:
+        raise ValueError('lo must be non-negative')
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if x > a[mid]: hi = mid
+        else: lo = mid+1
+    return lo
 #
 # Data Structures
 #
@@ -51,6 +75,9 @@ class list1(list):
 
   def index(self, value, start=1, stop=-1):
     return list.index(self, value, self._zerobased(start), self._zerobased(stop)) + 1
+
+  def insert(self, index, value):
+    return list.insert(self, self._zerobased(index), value)
 
   def pop(self, i):
     return list.pop(self, self._zerobased(i))
@@ -99,6 +126,7 @@ class Problem(object):
     self.c=np.append(self.c,[cost],0)
     self.n+=1
 
+
   def __str__(self):
     return str(self.__dict__)
 
@@ -108,30 +136,21 @@ class SolInfo(object):
   '''
   
   @staticmethod
-  def findInsertionIndex(slist, solV, startfrom=1):
+  def findInsertionIndex(slist, sol, startfrom=1):
+    ''' 
+    Find the proper insertion index on the sorted list of solutions provided (binary search)
+    '''
+    assert issubclass(type(slist), list1)
     up=len(slist)
     low=startfrom
-    done=False
-    while not done:
-      done=up==low
-      mid=(low+up)/2
-      if slist[mid].V>=solV:
-        if len(slist)==mid+1:   # last element
-          return len(slist)
-        elif slist[mid+1].V<solV:
-          return mid+1
-        else:
-          low=mid+1
-      elif slist[mid].V<solV:
-        if mid==0 or slist[mid-1].V>=solV:
-          return mid
-        else:
-          up=mid-1
-    return None
+    return reverse_bisect(slist, sol, lo=startfrom, hi=len(slist)+1)
 
   @staticmethod
   def sortNonIncreasing(slist, slce=(0,-1)):
-    slist.sort(lambda x,y: int(x.V-y.V), reverse=True)
+    ''' 
+    Sort solutions in list in non increasing order 
+    '''
+    slist.sort(reverse=True)
     return slist
     #l=sorted(slist[slce[0]:slce[1]], lambda x,y: int(x.V-y.V), reverse=True)
     #l.extend(slist[slce[1]:])
@@ -161,6 +180,22 @@ class SolInfo(object):
     else:
       return id(self)==id(other)
 
+  def __lt__(self, other):
+    assert issubclass(type(other), SolInfo)
+    return  self.V<other.V
+
+  def __ne__(self, other):
+    return not self==other
+
+  def __gt__(self, other):
+    return not self==other and not self<other
+
+  def __le__(self, other):
+    return self==other or self<other
+
+  def __ge__(self, other):
+    return self==other or self>other
+
   def __hash__(self):
     h=1493
     h=h*17+np.sum(self.X);
@@ -170,259 +205,285 @@ class SolInfo(object):
     h=h*23+hash(self.V)
     return h
 
-#
-# K-Best: Backtracking
-#
 
-def searchAltSol(M, prob, t, j, zcum, j1, i, L, p, k):
+class KBestSolver(object):
   '''
-  Search alternative solutions in the specified supernode. 
+  @class KKP Problem Solver
+
+  See: 
+    Yanasse, Soma, Maculan
+    An Algorithm For Determining The K-Best Solutions Of The One-Dimensional Knapsack Problem 
+    http://dx.doi.org/10.1590/S0101-74382000000100011
   '''
-  logging.debug('searchAltSol: t={}, j={}, j1={}, zcum={}'.format(t,j,j1,zcum))
-  for s in xrange(1, j1+1):
-    if s!=j:
-      if M[t,s]>=0:
-        if M[t,s]+zcum >= L[p].V:
-          # Determine position g: g>i to insert this alternative 
-          # solution in ordered list L
-          g=SolInfo.findInsertionIndex(L, M[t,s]+zcum, startfrom=i)
-          if p<k:
-            p+=1
-          f=p
-          while f>g:
-            L[f]=L[f-1]
-            f-=1
-          
-          L[g].V=M[t,s]+zcum
-          L[g].J=L[i].J
-          L[g].T=L[i].T
-          
-          auxl1=SolInfo(problem=prob)
-          auxl1.V=M[t,s]
-          auxl1.J=s
-          auxl1.T=t
-          
-          backtracking(M, prob, L, auxl1, g, p, k)
-          
-          L[g].C=True
-          L[g].X[1:]=L[i].X[1:]+auxl1.X[1:]
-          
-          if M[t,s]>=L[p].V:
-            # Determine position kk : kk>g to insert this alternative 
+
+  def __init__(self):
+    pass
+
+  #
+  # K-Best: Backtracking
+  #
+
+  def _searchAltSol(self, t, j, zcum, j1, i):
+    '''
+    Search alternative solutions in the specified supernode. 
+    '''
+    logging.debug('searchAltSol: t={}, j={}, j1={}, zcum={}'.format(t,j,j1,zcum))
+    for s in xrange(1, j1+1):
+      if s!=j:
+        if self.M[t,s]>=0:
+          if self.M[t,s]+zcum >= self.L[self.p].V:
+            # Determine position g: g>i to insert this alternative 
             # solution in ordered list L
-            kk=SolInfo.findInsertionIndex(L, M[t,s], startfrom=g)
-            if p<k:
-              p+=1
-            f=p
-            while(f>kk):
-              L[f]=L[f-1]
-              f-=1
-            L[kk]=auxl1
+            sol=SolInfo(problem=self.prob)
+            sol.V=self.M[t,s]+zcum
+            sol.T=t
+            sol.J=s
+
+            g=SolInfo.findInsertionIndex(self.L, sol, startfrom=i)
+            self.L.insert(g,sol)
+
+            if self.p<self.k:
+              self.p+=1
+            #f=self.p
+            #while f>g:
+            #  self.L[f]=self.L[f-1]
+            #  f-=1
+            
+            #self.L[g].V=self.M[t,s]+zcum
+            #self.L[g].J=self.L[i].J
+            #self.L[g].T=self.L[i].T
+            
+            auxl1=SolInfo(problem=self.prob)
+            auxl1.V=self.M[t,s]
+            auxl1.J=s
+            auxl1.T=t
+            
+            self._backtracking(auxl1, g, alternative=False)
+            
+            self.L[g].C=True
+            self.L[g].X[1:]=self.L[i].X[1:]+auxl1.X[1:]
+            
+            if self.M[t,s]>=self.L[self.p].V:
+              # Determine position kk : kk>g to insert this alternative 
+              # solution in ordered list L
+              kk=SolInfo.findInsertionIndex(self.L, self.M[t,s], startfrom=g)
+              if self.p<self.k:
+                self.p+=1
+              self.L.insert(kk,auxl1)
+              #f=self.p
+              #while(f>kk):
+              #  self.L[f]=self.L[f-1]
+              #  f-=1
+              #self.L[kk]=auxl1
 
 
-def backtracking(M, prob, L, auxl, i, p, k):
-  ''' 
-  Backtrack the matrix representation of the problem and recover solutions 
-  '''
-  logging.debug('backtracking: auxl={}'.format(auxl))
-  t=auxl.T
-  j=auxl.J
-  j1=j
-  z=auxl.V
-  zcum=0
-  while t>0:
-    t-=prob.a[j]
-    z-=prob.c[j]
-    zcum+=prob.c[j]
-    auxl.X[j]=auxl.X[j]+1
-    # j = {s: M[t,s] = z , 1 <= s <= j}
-    tmp=np.where(M[t,:j]==z)
-    if tmp[0].shape==(0,):
-      logging.debug('backtracking: z={} NOT found in M[{},1:{}]={}'.format(z,t,j,M[t,1:j]))
-      continue
-    else:
-      logging.debug('backtracking: z={} found at {} in M[{},1:{}]={}'.format(z,tmp[0][0],t,j,M[t,1:j]))
-      j=tmp[0][0]
-    
-    #j1=auxl.J
-    if t>0:
-      searchAltSol(M,prob,t,j,zcum,j1,j,L,p,k)
+  def _backtracking(self, auxl, i, alternative=True):
+    ''' 
+    Backtrack the matrix representation of the problem and recover solutions 
+    '''
+    t=auxl.T
+    j=auxl.J
     j1=j
-  auxl.C=True
+    z=auxl.V
+    zcum=0
+    logging.debug('backtracking auxl: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
+    while t>0:
+      t-=self.prob.a[j]
+      z-=self.prob.c[j]
+      zcum+=self.prob.c[j]
+      auxl.X[j]+=1
+      if z==0:
+        logging.debug('backtracking root: t={}, z={}, j={}, M[t,:]={}'.format(t,z,j,self.M[t,:]))
+        break
+      
+      # j = {s: M[t,s] = z , 1 <= s <= j}
+      for jj in xrange(1,j+1):
+        if self.M[t,jj]==z:
+          j=jj
+          logging.debug('backtracking sol: z={} found at {} in M[{},{}]={}'.format(z,j,t,j,self.M[t,1:]))
+      if t>0 and alternative:
+        self._searchAltSol(t,j,zcum,j1,j)
+      j1=j
+    auxl.C=True
 
-def recoverSol(M, prob, L, p, k):
-  ''' 
-  Recover solution and search for alternatives
-  '''
-  i=0
-  while i<p:
-    i+=1
-    if not L[i].C:
-      auxl=L[i]
-      backtracking(M,prob,L,auxl,i,p,k)
-      L[i]=auxl
-  return L
+  def _recoverSol(self):
+    ''' 
+    Recover solution and search for alternatives
+    '''
+    i=0
+    while i<self.p:
+      i+=1
+      if not self.L[i].C:
+        auxl=self.L[i]
+        self._backtracking(auxl, i)
+        self.L[i]=auxl
 
-def builtInitKBest(M, prob, k):
-  ''' 
-  Build the initial K-Best solution 
-  '''
-  L=list1()
-  counter=0
-  i=prob.b+1
-  fim=False
-  moreleft=False
-  
-  while i>prob.a[1]:
-    i-=1
-    j=prob.n+1
-    while j>1:
-      j-=1
-      if M[i,j]>=0:
-        
-        sol=SolInfo(problem=prob)
-        sol.V=M[i,j]
-        sol.J=j
-        sol.T=i
-        if sol in L:
-          logging.debug('buildInitKBest: (L) duplicate found {}'.format(sol))
-        else:
-          logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L)'.format(M[i,j],i,j))
-          counter+=1
-          L.append(sol)  
-        if counter==k:
-          i1=i; j1=j
-          moreleft=True
-          i=0; j=0
-  
-  p=counter
-  L=SolInfo.sortNonIncreasing(L)
-  
-  if p==k and (i1>prob.a[1] or j1>1):
-    fim=True
-  
-  while fim:
-    L1=list1()
+  def _builtInitKBest(self):
+    ''' 
+    Build the initial K-Best solution 
+    '''
+    L=list1()
     counter=0
-    i=i1+1
+    i=self.prob.b+1
     fim=False
-    while i>prob.a[1]:
+    moreleft=False
+    
+    while i>self.prob.a[1]:
       i-=1
-      j=prob.n+1
-      if moreleft:
-        j=j1
-        moreleft=False
+      j=self.prob.n+1
       while j>1:
         j-=1
-        if M[i,j]>L[p].V:
+        if self.M[i,j]>=0:
           
-          sol=SolInfo(problem=prob)
-          sol.V=M[i,j]
+          sol=SolInfo(problem=self.prob)
+          sol.V=self.M[i,j]
           sol.J=j
           sol.T=i
-          if sol in L or sol in L1:
-            logging.debug('buildInitKBest: (L1) duplicate found {}'.format(sol))
+          if sol in L:
+            logging.debug('buildInitKBest: (L) duplicate found {}'.format(sol))
           else:
-            logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L1)'.format(M[i,j],i,j))
-            L1.append(sol)
+            logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L)'.format(self.M[i,j],i,j))
             counter+=1
-          if counter==k:
+            L.append(sol)  
+          if counter==self.k:
             i1=i; j1=j
             moreleft=True
             i=0; j=0
-    p1=counter
-    L1=SolInfo.sortNonIncreasing(L1)
-    if len(L1)>0 and L1[1].V>L[k].V:
-
-      # Merging:
-      # Using L and L1 build sorted list of k objects having largest value V 
-      # and put those values in L[0:k]
-      #logging.debug('buildInitKBest: merging\nL=\n{}\nL1=\n{}'.format('\n'.join([str(x) for x in L]),'\n'.join([str(x) for x in L1])))
-      x=1; y=1; z=1
-      mergedL=list1()
-      while x<len(L)+1 and y<len(L1)+1 and z<k+1:
-        if L[x].V>L1[y].V:
-          sol=L[x]; x+=1
-        else:
-          sol=L1[y]; y+=1
-        #if sol:# not in mergedL:
-        mergedL.append(sol)
-        z+=1
-      while x<len(L)+1 and z<k+1:
-        #if L[x]:# not in mergedL:
-        mergedL.append(L[x]); z+=1
-        x+=1
-      while y<len(L1)+1 and z<k+1:
-        #if L1[y]:# not in mergedL:
-        mergedL.append(L1[y]); z+=1
-        y+=1
-      
-      for xx in xrange(1,k+1):
-        L[xx]=mergedL[xx]
-      
-      #logging.debug('buildInitKBest: i1={}, a1={}, j1={}'.format(i1,prob.a[1],j1))
-      if i1>prob.a[1] or j1>1:
-        fim=True
-  
-  for i in xrange(1, p+1):
-    L[i].X=np.zeros((prob.n+1))
-    L[i].C=False
-  return (L,p)
-
-def backtrack(M, prob, k):
-  ''' 
-  Backward enumeration. It recover solution from matrix representation of the problem.
-  '''
-  L,p=builtInitKBest(M,prob,k)
-  LOGGER.debug('backward: init kbest:\n{}'.format('\n'.join(str(x) for x in L) ))
-  recoverSol(M,prob,L,p,k)
-  return L
-
-#
-# K-Best: Forward enumeration
-#
-
-def forward(M, prob):
-  ''' 
-  Forward enumeration. It fills the matrix representation of the problem
-  '''
-  logging.debug('forward: '.format())
-  M[0,:]=0
-
-  for j in xrange(1,prob.n+1):
-    M[prob.a[j],j]=prob.c[j]
-  logging.debug('Matrix before forward enumeration:\n{}'.format(M[0:,1:])) 
-  
-  for t in xrange(prob.a[1], prob.b-prob.a[1]+1):
     
-    valid_values=M[t,:]>=0
-    if len(valid_values)>0:
-      tmp=np.where(valid_values)
-      m=min(tmp[0])
-      logging.debug('forward: M[{},:]={} min found at {}'.format(t,M[t,1:],m,tmp))
-    else:
-      logging.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,M[t,1:]))
-      continue
+    self.p=counter
+    L=SolInfo.sortNonIncreasing(L)
     
-    z=M[t,m]
-    for i in xrange(m,prob.n+1):
-      if t+prob.a[i]<=prob.b:
-        if M[t,i]>z:
-          z=M[t,i]
-        M[t+prob.a[i],i]=z+prob.c[i]
+    if self.p==self.k and (i1>self.prob.a[1] or j1>1):
+      fim=True
+    
+    while fim:
+      L1=list1()
+      counter=0
+      i=i1+1
+      fim=False
+      while i>self.prob.a[1]:
+        i-=1
+        j=self.prob.n+1
+        if moreleft:
+          j=j1
+          moreleft=False
+        while j>1:
+          j-=1
+          if self.M[i,j]>L[self.p].V:
+            
+            sol=SolInfo(problem=self.prob)
+            sol.V=self.M[i,j]
+            sol.J=j
+            sol.T=i
+            if sol in L or sol in L1:
+              logging.debug('buildInitKBest: (L1) duplicate found {}'.format(sol))
+            else:
+              logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L1)'.format(self.M[i,j],i,j))
+              L1.append(sol)
+              counter+=1
+            if counter==self.k:
+              i1=i; j1=j
+              moreleft=True
+              i=0; j=0
+      p1=counter
+      L1=SolInfo.sortNonIncreasing(L1)
+      if len(L1)>0 and L1[1].V>L[self.k].V:
 
-#
-# K-Best: Algorithm
-#
+        # Merging:
+        # Using L and L1 build sorted list of k objects having largest value V 
+        # and put those values in L[0:k]
+        #logging.debug('buildInitKBest: merging\nL=\n{}\nL1=\n{}'.format('\n'.join([str(x) for x in L]),'\n'.join([str(x) for x in L1])))
+        x=1; y=1; z=1
+        mergedL=list1()
+        while x<len(L)+1 and y<len(L1)+1 and z<self.k+1:
+          if L[x].V>L1[y].V:
+            sol=L[x]; x+=1
+          else:
+            sol=L1[y]; y+=1
+          #if sol:# not in mergedL:
+          mergedL.append(sol)
+          z+=1
+        while x<len(L)+1 and z<self.k+1:
+          #if L[x]:# not in mergedL:
+          mergedL.append(L[x]); z+=1
+          x+=1
+        while y<len(L1)+1 and z<self.k+1:
+          #if L1[y]:# not in mergedL:
+          mergedL.append(L1[y]); z+=1
+          y+=1
+        
+        for xx in xrange(1,self.k+1):
+          L[xx]=mergedL[xx]
+        
+        #logging.debug('buildInitKBest: i1={}, a1={}, j1={}'.format(i1,prob.a[1],j1))
+        if i1>self.prob.a[1] or j1>1:
+          fim=True
+    
+    for i in xrange(1, self.p+1):
+      L[i].X=np.zeros((self.prob.n+1))
+      L[i].C=False
 
-def kbest(prob, k):
-  assert issubclass(type(prob),Problem)
-  assert k>0
-  M=Problem.newMatrixRepresentation(prob)
-  forward(M, prob)
-  logging.debug('Matrix after forward enumeration:\n{}'.format(M[1:,1:]))
-  L=backtrack(M, prob, k)
-  return list(L[:k+1])
+    self.L=L
+
+  def _backtrack(self):
+    ''' 
+    Backward enumeration. It recover solution from matrix representation of the problem.
+    '''
+    self._builtInitKBest()
+    LOGGER.debug('backward: init kbest:\n{}'.format('\n'.join('supernode V={}, J={}, T={} '.format(x.V,x.J,x.T) for x in self.L) ))
+    self._recoverSol()
+
+  #
+  # K-Best: Forward enumeration
+  #
+
+  def _forward(self):
+    ''' 
+    Forward enumeration. It fills the matrix representation of the problem
+    '''
+    #logging.debug('forward: '.format())
+    self.M[0,1:]=0
+
+    for j in xrange(1,prob.n+1):
+      self.M[self.prob.a[j],j]=self.prob.c[j]
+    #logging.debug('Matrix before forward enumeration:\n{}'.format(M[0:,1:])) 
+    
+    for t in xrange(self.prob.a[1], self.prob.b-self.prob.a[1]+1):
+      
+      valid_values=self.M[t,:]>=0
+      if len(valid_values)>0:
+        tmp=np.where(valid_values)
+        m=min(tmp[0])
+        logging.debug('forward: M[{},:]={} min found at {}'.format(t,self.M[t,1:],m,tmp))
+      else:
+        logging.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,self.M[t,1:]))
+        continue
+      
+      z=self.M[t,m]
+      for i in xrange(m, self.prob.n+1):
+        if t+self.prob.a[i]<=self.prob.b:
+          if self.M[t,i]>z:
+            z=self.M[t,i]
+          self.M[t+self.prob.a[i],i]=z+self.prob.c[i]
+
+  #
+  # K-Best: Algorithm
+  #
+
+  def kbest(self, prob, k):
+    ''' 
+    Determine the k-best solutions of a 1-D Knapsack problem 
+    '''
+    assert issubclass(type(prob),Problem)
+    assert k>0
+    self.k=k
+    self.prob=prob
+    self.M=Problem.newMatrixRepresentation(self.prob)
+    self._forward()
+    logging.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+    self._backtrack()
+    #return list(self.L[:self.k+1])
+    return list(self.L)
 
 #
 # CLI interface
@@ -434,7 +495,8 @@ if __name__=='__main__':
   parser.add_argument('prob',help='Text file containing problem data',action='store')
   args = parser.parse_args()
   prob=Problem.problemFromFile(args.prob)
-  L=kbest(prob, args.k)
+  kbs=KBestSolver()
+  L=kbs.kbest(prob, args.k)
   print('Best {} Solutions:'.format(len(L)))
   for sol in L:
     print('X: {} V: {} '.format(sol.getDecisionVars(),sol.V))
