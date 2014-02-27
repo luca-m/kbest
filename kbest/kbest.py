@@ -14,6 +14,7 @@ import re
 import numpy as np
 import argparse
 import logging
+import time
 
 LOGGER=logging.getLogger()
 
@@ -134,7 +135,7 @@ class Problem(object):
   def __str__(self):
     return str(self.__dict__)
 
-class SolInfo(object):
+class Solution(object):
   '''
   @class Solution information representation
   '''
@@ -182,13 +183,13 @@ class SolInfo(object):
     return str(self.__dict__)
 
   def __eq__(self, other):
-    if issubclass(type(other), SolInfo):
+    if issubclass(type(other), Solution):
       return self.J==other.J and self.T==other.T and self.V==other.V  
     else:
       return id(self)==id(other)
 
   def __lt__(self, other):
-    assert issubclass(type(other), SolInfo)
+    assert issubclass(type(other), Solution)
     return  self.V<other.V
 
   def __ne__(self, other):
@@ -224,7 +225,7 @@ class KBestSolver(object):
   '''
 
   def __init__(self):
-    pass
+    self.stats={'forward':0, 'backward':0}
 
   #
   # K-Best: Backtracking
@@ -234,19 +235,18 @@ class KBestSolver(object):
     '''
     Search alternative solutions in the specified supernode. 
     '''
-    #logging.debug('searchAltSol: t={}, j={}, j1={}, zcum={}'.format(t,j,j1,zcum))
     for s in xrange(1, j1+1):
       if s!=j:
         if self.M[t,s]>=0:
           if self.M[t,s]+zcum >= self.L[self.p].V:
             # Determine position g: g>i to insert this alternative 
             # solution in ordered list L
-            alt_sol=SolInfo(problem=self.prob)
+            alt_sol=Solution(problem=self.prob)
             alt_sol.V=self.M[t,s]+zcum
             alt_sol.T=t
             alt_sol.J=s
 
-            g=SolInfo.findInsertionIndex(self.L, alt_sol, startfrom=sol_index)
+            g=Solution.findInsertionIndex(self.L, alt_sol, startfrom=sol_index)
             self.L.insert(g,alt_sol)    # alternative solution is in pos g, now compute its value.
 
             if self.p<self.k:
@@ -260,7 +260,7 @@ class KBestSolver(object):
             #self.L[g].J=self.L[i].J
             #self.L[g].T=self.L[i].T
             
-            current_sol=SolInfo(problem=self.prob)
+            current_sol=Solution(problem=self.prob)
             current_sol.V=self.M[t,s]
             current_sol.J=s
             current_sol.T=t
@@ -280,7 +280,7 @@ class KBestSolver(object):
             if self.M[t,s]>=self.L[self.p].V:
               # Determine position kk : kk>g to insert this alternative 
               # solution in ordered list L
-              kk=SolInfo.findInsertionIndex(self.L, auxl1, startfrom=g)
+              kk=Solution.findInsertionIndex(self.L, auxl1, startfrom=g)
               if self.p<self.k:
                 self.p+=1
               self.L.insert(kk,auxl1)
@@ -353,7 +353,7 @@ class KBestSolver(object):
         j-=1
         if self.M[i,j]>=0:
           
-          sol=SolInfo(problem=self.prob)
+          sol=Solution(problem=self.prob)
           sol.V=self.M[i,j]
           sol.J=j
           sol.T=i
@@ -369,7 +369,7 @@ class KBestSolver(object):
             i=0; j=0
     
     self.p=counter
-    SolInfo.sortNonIncreasing(self.L)
+    Solution.sortNonIncreasing(self.L)
     
     if self.p==self.k and (i1>self.prob.a[1] or j1>1):
       fim=True
@@ -389,7 +389,7 @@ class KBestSolver(object):
           j-=1
           if self.M[i,j]>self.L[self.p].V:
             
-            sol=SolInfo(problem=self.prob)
+            sol=Solution(problem=self.prob)
             sol.V=self.M[i,j]
             sol.J=j
             sol.T=i
@@ -404,7 +404,7 @@ class KBestSolver(object):
               moreleft=True
               i=0; j=0
       p1=counter
-      L1=SolInfo.sortNonIncreasing(L1)
+      L1=Solution.sortNonIncreasing(L1)
       if len(L1)>0 and L1[1].V>self.L[self.k].V:
 
         # Merging:
@@ -498,10 +498,16 @@ class KBestSolver(object):
     self.k=k
     self.prob=prob
     self.M=Problem.newMatrixRepresentation(self.prob)
+    forward_time_start=time.clock()
     self._forward()
+    forward_time_stop=time.clock()
     if LOGGER.isEnabledFor(logging.DEBUG):
       LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+    backward_time_start=time.clock()
     self._backtrack()
+    backward_time_stop=time.clock()
+    self.stats['forward']= (forward_time_stop-forward_time_start)
+    self.stats['backward']= (backward_time_stop-backward_time_start)
     return list(self.L[:self.k+1])
     #return list(self.L)
 
@@ -519,18 +525,23 @@ def get_sample_problem():
   prob.b=15
   return prob
 
-def pretty_print(prob, slist):
+def pretty_print(prob, slist, stats=dict(), onlyPerformance=False):
   assert issubclass(type(prob), Problem)
   print('Problem:')
   print('nvar={} capacity={}'.format(prob.n,prob.b))
-  print('{}-best solutions:'.format(len(slist)))
-  for sol in slist:
-    print('value={} vars={}'.format(sol.V,sol.getDecisionVars()))
+  if not onlyPerformance:
+    print('{}-best solutions:'.format(len(slist)))
+    for sol in slist:
+      print('value={} vars={}'.format(sol.V,sol.getDecisionVars()))
+  print('Performance:')
+  for k,v in stats.items():
+    print('{}={} s.'.format(k,v))
 
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('--sample',help='run with sample problem', action='store_true')
   parser.add_argument('-v',help='Verbose output', action='store_true')
+  parser.add_argument('-p',help='Print only performance, no k-best solutions', action='store_true')
   parser.add_argument('-k',help='Number of best solution to retrieve', type=int, default=5)
   parser.add_argument('prob',help='Text file containing problem data', 
                       default=[], nargs='*', action='store')
@@ -552,6 +563,6 @@ if __name__=='__main__':
   kbs=KBestSolver()
   for prob in problems:
     L=kbs.kbest(prob, args.k)
-    pretty_print(prob,L)
+    pretty_print(prob,L, kbs.stats, args.p)
 
 
