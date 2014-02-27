@@ -110,8 +110,7 @@ class Problem(object):
         _,c,a=fields[i].split(' ')
         c=int(c)
         a=int(a)
-        prob.c=np.append(prob.c,[c])
-        prob.a=np.append(prob.a,[a])
+        prob.addVariable(self, c, a)
       prob.b=int(fields[prob.n+1])
       return prob
 
@@ -121,7 +120,7 @@ class Problem(object):
     self.a=np.zeros((self.n+1),dtype=int)
     self.b=b
   
-  def addVariable(self, weight, cost):
+  def addVariable(self, cost, weight):
     self.a=np.append(self.a,[weight],0)
     self.c=np.append(self.c,[cost],0)
     self.n+=1
@@ -170,6 +169,9 @@ class SolInfo(object):
  
   def getDecisionVars(self):
     return self.X[1:]
+
+  def setDecisionVars(self, dvars):
+    self.X=np.append(np.zeros((1)),dvars,0)
 
   def __str__(self):
     return str(self.__dict__)
@@ -223,24 +225,24 @@ class KBestSolver(object):
   # K-Best: Backtracking
   #
 
-  def _searchAltSol(self, t, j, zcum, j1, i):
+  def _searchAltSol(self, t, j, zcum, j1, sol_index):
     '''
     Search alternative solutions in the specified supernode. 
     '''
-    logging.debug('searchAltSol: t={}, j={}, j1={}, zcum={}'.format(t,j,j1,zcum))
+    #logging.debug('searchAltSol: t={}, j={}, j1={}, zcum={}'.format(t,j,j1,zcum))
     for s in xrange(1, j1+1):
       if s!=j:
         if self.M[t,s]>=0:
           if self.M[t,s]+zcum >= self.L[self.p].V:
             # Determine position g: g>i to insert this alternative 
             # solution in ordered list L
-            sol=SolInfo(problem=self.prob)
-            sol.V=self.M[t,s]+zcum
-            sol.T=t
-            sol.J=s
+            alt_sol=SolInfo(problem=self.prob)
+            alt_sol.V=self.M[t,s]+zcum
+            alt_sol.T=t
+            alt_sol.J=s
 
-            g=SolInfo.findInsertionIndex(self.L, sol, startfrom=i)
-            self.L.insert(g,sol)
+            g=SolInfo.findInsertionIndex(self.L, alt_sol, startfrom=sol_index)
+            self.L.insert(g,alt_sol)    # alternative solution is in pos g, now compute its value.
 
             if self.p<self.k:
               self.p+=1
@@ -253,20 +255,26 @@ class KBestSolver(object):
             #self.L[g].J=self.L[i].J
             #self.L[g].T=self.L[i].T
             
-            auxl1=SolInfo(problem=self.prob)
-            auxl1.V=self.M[t,s]
-            auxl1.J=s
-            auxl1.T=t
-            
-            self._backtracking(auxl1, g, alternative=False)
-            
+            current_sol=SolInfo(problem=self.prob)
+            current_sol.V=self.M[t,s]
+            current_sol.J=s
+            current_sol.T=t
+            #if auxl1 in self.L:
+            #  self._backtracking(auxl1, g, alternative=True)
+            #else:
+            self._backtracking(current_sol, g, alternative=False)
             self.L[g].C=True
-            self.L[g].X[1:]=self.L[i].X[1:]+auxl1.X[1:]
+            self.L[g].setDecisionVars(self.L[sol_index].getDecisionVars()+current_sol.getDecisionVars())
+            logging.debug(''.join(('searchAltSol: alternative sol!\n  current_sol.V={}, current_sol.X={}\n  ',
+                           'L[{}].V={}, L[i].X={}\n  ',
+                           'L[{}].V={}, L[g].X={}')).format(current_sol.V, current_sol.getDecisionVars(), 
+                                          sol_index, self.L[sol_index].V, self.L[sol_index].getDecisionVars(), 
+                                          g, self.L[g].V, self.L[g].getDecisionVars()))
             
             if self.M[t,s]>=self.L[self.p].V:
               # Determine position kk : kk>g to insert this alternative 
               # solution in ordered list L
-              kk=SolInfo.findInsertionIndex(self.L, self.M[t,s], startfrom=g)
+              kk=SolInfo.findInsertionIndex(self.L, auxl1, startfrom=g)
               if self.p<self.k:
                 self.p+=1
               self.L.insert(kk,auxl1)
@@ -277,23 +285,24 @@ class KBestSolver(object):
               #self.L[kk]=auxl1
 
 
-  def _backtracking(self, auxl, i, alternative=True):
+  def _backtracking(self, current_sol, sol_index, alternative=True):
     ''' 
     Backtrack the matrix representation of the problem and recover solutions 
     '''
-    t=auxl.T
-    j=auxl.J
+    t=current_sol.T
+    j=current_sol.J
     j1=j
-    z=auxl.V
+    z=current_sol.V
     zcum=0
-    logging.debug('backtracking auxl: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
+    logging.debug('backtracking current_sol: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
     while t>0:
       t-=self.prob.a[j]
       z-=self.prob.c[j]
       zcum+=self.prob.c[j]
-      auxl.X[j]+=1
+      current_sol.X[j]+=1
+      logging.debug('backtracking current_sol: j={}, auxj.X={}'.format(j,current_sol.getDecisionVars()))
       if z==0:
-        logging.debug('backtracking root: t={}, z={}, j={}, M[t,:]={}'.format(t,z,j,self.M[t,:]))
+        #logging.debug('backtracking root: t={}, z={}, j={}, M[t,:]={}'.format(t,z,j,self.M[t,:]))
         break
       
       # j = {s: M[t,s] = z , 1 <= s <= j}
@@ -302,9 +311,9 @@ class KBestSolver(object):
           j=jj
           logging.debug('backtracking sol: z={} found at {} in M[{},{}]={}'.format(z,j,t,j,self.M[t,1:]))
       if t>0 and alternative:
-        self._searchAltSol(t,j,zcum,j1,j)
+        self._searchAltSol(t, j, zcum, j1, sol_index)
       j1=j
-    auxl.C=True
+    current_sol.C=True
 
   def _recoverSol(self):
     ''' 
@@ -314,9 +323,9 @@ class KBestSolver(object):
     while i<self.p:
       i+=1
       if not self.L[i].C:
-        auxl=self.L[i]
-        self._backtracking(auxl, i)
-        self.L[i]=auxl
+        current_sol=self.L[i]
+        self._backtracking(current_sol, i)
+        self.L[i]=current_sol
 
   def _builtInitKBest(self):
     ''' 
@@ -339,19 +348,19 @@ class KBestSolver(object):
           sol.V=self.M[i,j]
           sol.J=j
           sol.T=i
-          if sol in L:
+          if sol in self.L:
             logging.debug('buildInitKBest: (L) duplicate found {}'.format(sol))
           else:
             logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L)'.format(self.M[i,j],i,j))
             counter+=1
-            L.append(sol)  
+            self.L.append(sol)  
           if counter==self.k:
             i1=i; j1=j
             moreleft=True
             i=0; j=0
     
     self.p=counter
-    L=SolInfo.sortNonIncreasing(L)
+    SolInfo.sortNonIncreasing(self.L)
     
     if self.p==self.k and (i1>self.prob.a[1] or j1>1):
       fim=True
@@ -375,7 +384,7 @@ class KBestSolver(object):
             sol.V=self.M[i,j]
             sol.J=j
             sol.T=i
-            if sol in L or sol in L1:
+            if sol in self.L or sol in L1:
               logging.debug('buildInitKBest: (L1) duplicate found {}'.format(sol))
             else:
               logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L1)'.format(self.M[i,j],i,j))
@@ -395,7 +404,7 @@ class KBestSolver(object):
         #logging.debug('buildInitKBest: merging\nL=\n{}\nL1=\n{}'.format('\n'.join([str(x) for x in L]),'\n'.join([str(x) for x in L1])))
         x=1; y=1; z=1
         mergedL=list1()
-        while x<len(L)+1 and y<len(L1)+1 and z<self.k+1:
+        while x<len(self.L)+1 and y<len(L1)+1 and z<self.k+1:
           if self.L[x].V>L1[y].V:
             sol=self.L[x]; x+=1
           else:
@@ -403,7 +412,7 @@ class KBestSolver(object):
           #if sol:# not in mergedL:
           mergedL.append(sol)
           z+=1
-        while x<len(L)+1 and z<self.k+1:
+        while x<len(self.L)+1 and z<self.k+1:
           #if self.L[x]:# not in mergedL:
           mergedL.append(self.L[x]); z+=1
           x+=1
@@ -482,19 +491,35 @@ class KBestSolver(object):
     self._forward()
     logging.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
     self._backtrack()
-    #return list(self.L[:self.k+1])
-    return list(self.L)
+    return list(self.L[:self.k+1])
+    #return list(self.L)
 
 #
 # CLI interface
 #
 
+def get_sample_problem():
+  prob=Problem()
+  prob.addVariable(4,3)
+  prob.addVariable(3,4)
+  prob.addVariable(5,5)
+  prob.addVariable(7,6)
+  prob.addVariable(8,7)
+  prob.b=15
+  return prob
+
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('--sample',help='run with sample problem', action='store_true')
   parser.add_argument('-k',help='Number of best solution to retrieve', type=int, default=5)
   parser.add_argument('prob',help='Text file containing problem data',action='store')
   args = parser.parse_args()
-  prob=Problem.problemFromFile(args.prob)
+
+  if args.sample is True:
+    prob=get_sample_problem()
+  else: 
+    prob=Problem.problemFromFile(args.prob)
+
   kbs=KBestSolver()
   L=kbs.kbest(prob, args.k)
   print('Best {} Solutions:'.format(len(L)))
