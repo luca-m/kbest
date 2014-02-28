@@ -15,6 +15,7 @@ import numpy as np
 import argparse
 import logging
 import time
+import sys
 
 LOGGER=logging.getLogger()
 
@@ -280,10 +281,10 @@ class KBestSolver(object):
             if self.M[t,s]>=self.L[self.p].V:
               # Determine position kk : kk>g to insert this alternative 
               # solution in ordered list L
-              kk=Solution.findInsertionIndex(self.L, auxl1, startfrom=g)
+              kk=Solution.findInsertionIndex(self.L, current_sol, startfrom=g)
               if self.p<self.k:
                 self.p+=1
-              self.L.insert(kk,auxl1)
+              self.L.insert(kk,current_sol)
               #f=self.p
               #while(f>kk):
               #  self.L[f]=self.L[f-1]
@@ -495,21 +496,26 @@ class KBestSolver(object):
     '''
     assert issubclass(type(prob),Problem)
     assert k>0
+
     self.k=k
     self.prob=prob
     self.M=Problem.newMatrixRepresentation(self.prob)
+
     forward_time_start=time.clock()
     self._forward()
     forward_time_stop=time.clock()
+    
     if LOGGER.isEnabledFor(logging.DEBUG):
       LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+    
     backward_time_start=time.clock()
     self._backtrack()
     backward_time_stop=time.clock()
+    
     self.stats['forward']= (forward_time_stop-forward_time_start)
     self.stats['backward']= (backward_time_stop-backward_time_start)
+    
     return list(self.L[:self.k+1])
-    #return list(self.L)
 
 #
 # CLI interface
@@ -525,27 +531,32 @@ def get_sample_problem():
   prob.b=15
   return prob
 
-def pretty_print(prob, slist, stats=dict(), onlyPerformance=False):
+def print_solutions(slist):
   assert issubclass(type(prob), Problem)
-  print('Problem:')
-  print('nvar={} capacity={}'.format(prob.n,prob.b))
-  if not onlyPerformance:
-    print('{}-best solutions:'.format(len(slist)))
-    for sol in slist:
-      print('value={} vars={}'.format(sol.V,sol.getDecisionVars()))
-  print('Performance:')
-  for k,v in stats.items():
-    print('{}={} s.'.format(k,v))
-
+  print('{}-best solutions:'.format(len(slist)))
+  for sol in slist:
+    print('value={} vars={}'.format(sol.V,sol.getDecisionVars()))
+  
+def print_performance(prob, k, stats=dict(), header=False):
+  assert issubclass(type(prob), Problem)
+  if header:
+    print('# nvar, b, k, forward_time, backward_time')
+  print('{}, {}, {}, {}, {}'.format(prob.n, prob.b, k, stats['forward'], stats['backward']))
+  
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('--sample',help='run with sample problem', action='store_true')
   parser.add_argument('-v',help='Verbose output', action='store_true')
   parser.add_argument('-p',help='Print only performance, no k-best solutions', action='store_true')
+  parser.add_argument('-r','--repeat',help='Number of time to repeat the calculation of on each problem', type=int, default=1, action='store')
   parser.add_argument('-k',help='Number of best solution to retrieve', type=int, default=5)
   parser.add_argument('prob',help='Text file containing problem data', 
                       default=[], nargs='*', action='store')
   args = parser.parse_args()
+
+  if args.repeat < 0:
+    print(sys.stderr,'Wrong parameter! "-r" cannot be lower than 0.')
+    sys.exit(-1)
 
   if args.v:
     LOGGER.setLevel(logging.DEBUG)
@@ -559,10 +570,15 @@ if __name__=='__main__':
   else:
     for p in args.prob:
       problems.append(Problem.problemFromFile(p))
-
+  first=True
   kbs=KBestSolver()
   for prob in problems:
-    L=kbs.kbest(prob, args.k)
-    pretty_print(prob,L, kbs.stats, args.p)
+    for r in xrange(args.repeat):
+      L=kbs.kbest(prob, args.k)
+      if args.p:
+        print_performance(prob, kbs.k, kbs.stats, first)
+      else:
+        print_solutions(L)
+      first=False
 
 
