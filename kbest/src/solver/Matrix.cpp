@@ -17,6 +17,9 @@ namespace kbest{
     this->mtx= * new int[rows * cols];
     this->rows=rows;
     this->cols=cols;
+    for (int i=0;i<rows*cols;i++){
+      this->mtx[i]=-1;
+    }
   }
 
   Matrix::~Matrix(){

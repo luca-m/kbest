@@ -41,11 +41,11 @@ namespace kbest{
       /**
        * Set a variable of the problem using 0-based index
        * */
-      void addVariable(int i, int cost, int weight);
+      void setVariable(int i, int cost, int weight);
       /** 
        * Set a variable of the problem using 1-based index
        */
-      void addVariable1Based(int i, int cost, int weight);
+      void setVariable1Based(int i, int cost, int weight);
       /**
        * Get cost of i-th var using 0-based index
        * */
@@ -67,16 +67,23 @@ namespace kbest{
        * */
       int getCapacity();
       /**
+       * Set the capacity associated to the problem
+       * @param Knapsack capacity
+       * */
+      int setCapacity(int capacity);
+      /**
        * Returns the matrix associated to the problem
        * */
       kbest::Matrix getAssociatedMatrix();
 
     private:
  
+      /// Number of variables
       int nvar;
+      /// Capacity
       int b;
-      std::vector<int> a;
-      std::vector<int> c; 
+      /// Variable vector: <Weight,Cost>
+      std::vector<std::pair<int,int>> vars;
   
   };
 
