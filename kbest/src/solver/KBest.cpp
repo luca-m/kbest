@@ -10,13 +10,14 @@
 
 namespace kbest{
 
+  const Problem kDummyProblem=Problem(0,0);
+
   KBestSolver::KBestSolver(){
-    this->matrix=NULL;
-    this->prob=NULL;
+    this->prob=kDummyProblem;
   }
 
   KBestSolver::~KBestSolver(){
-    this->matrix.~Matrix();
+    this->M.~Matrix();
     this->L.~SolutionList();
   }
 
@@ -30,7 +31,7 @@ namespace kbest{
     // TODO: time
 
     // TODO: time
-    this->backtrack()
+    this->backward();
     // TODO: time
 
     return this->L;
@@ -45,8 +46,8 @@ namespace kbest{
       this->M.set1Based(this->prob.getA1Based(c), c, this->prob.getC1Based(c));
     }
 
-    for (int t=this->prob.getA1(0); t < this->prob.getCapacity()-this->prob.getA1(0)+1 ; t++){
-      
+    for (int t=this->prob.getA(0); t < this->prob.getCapacity()-this->prob.getA(0)+1 ; t++){
+
       for (int m=0; m < this->M.getNCols() ; m++){
         if (this->M.get(t-1, m) >=0) {      // t is 1-based, m is 0-based
           int z=this->M.get(t-1,m);
@@ -56,7 +57,7 @@ namespace kbest{
               if ( this->M.get(t-1,i) > z ){
                 z=this->M.get(t-1,i);
               }
-              this->M.set(t+this->prob.getA(i)-1, i) = z+this->prob.getC(i);
+              this->M.set(t+this->prob.getA(i)-1, i, z+this->prob.getC(i));
             }
           }
 
@@ -86,13 +87,13 @@ namespace kbest{
       i--;                        // i is 1-based
       j=this->prob.getNVar()+1;
       while (j>1) {
-        j-=1                      // j is 1-based
+        j--;                      // j is 1-based
         if (this->M.get1Based(i,j) >= 0){
           
-          sol=Solution(this->prob);
+          Solution sol=Solution(this->prob);
           sol.V=this->M.get1Based(i,j);
-          sol.J=j
-          sol.T=i
+          sol.J=j;
+          sol.T=i;
           if (!this->L.isIn(sol)) {
             counter++;
             this->L.addSolution(sol);
@@ -128,12 +129,12 @@ namespace kbest{
           j--;                        // j is 1-based
           if (this->M.get1Based(i,j) > this->L.get1Based(this->p).V) {    // index of L is 1-based
             
-            sol=Solution(this->prob);
-            sol.V=this->M.get1Based(i,j);
-            sol.J=j;
-            sol.T=i;
-            if !this->L.isIn(sol) && !L1.isIn(sol){
-              L1.addSolution(sol);
+            Solution sol1=Solution(this->prob);
+            sol1.V=this->M.get1Based(i,j);
+            sol1.J=j;
+            sol1.T=i;
+            if (!this->L.isIn(sol1) && !L1.isIn(sol1)){
+              L1.addSolution(sol1);
               counter++;
             }
             if (counter==this->k){
@@ -148,7 +149,7 @@ namespace kbest{
       L1.sortNonIncreasing();
 
       if (L1.size()>0 && L1.get(0).V > this->L.get1Based(this->k).V){
-        L.merge(L1);
+        L.merge(L1, this->k);
         if (i1 > this->prob.getA(0) || j1 > 1){
           fim=true;
         }
@@ -184,13 +185,13 @@ namespace kbest{
       }
       
       // j = {s: M[t,s] = z , 1 <= s <= j}
-      for (int s=1, s < j+1; s++){
+      for (int s=1; s < j+1; s++){
         if (this->M.get1Based(t,s)==z){
           j=s;
         }
       }
       if (t>0 && alternative){
-        this->searchAltSol(t, j, zcum, j1, sol_index)
+        this->searchAltSol(t, j, zcum, j1, sol_index);
       }
       j1=j;
     }
@@ -224,7 +225,7 @@ namespace kbest{
 
             this->backtracking(current_sol, g, false);
             this->L.get1Based(g).C=true;
-            this->L.get1Based(g).setDecisionVars(this->L.get1Based(sol_index).getDecisionVars() + current_sol.getDecisionVars());
+            this->L.get1Based(g).setDecisionVars( this->L.get1Based(sol_index).X + current_sol.X );
             
             if (this->M.get1Based(t,s) >= this->L.get1Based(this->p).V) {
               // Determine position kk : kk>g to insert this alternative 

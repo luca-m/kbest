@@ -7,8 +7,6 @@
 
 #include "Solution.h"
 
-#include <algorithm>
-
 namespace kbest{
 
   Solution::Solution(kbest::Problem & problem){
@@ -16,20 +14,20 @@ namespace kbest{
     this->T=0;
     this->J=0;
     this->V=0;
-    this->X=std::vector<int>(problem.nvars,0);
+    this->X=std::vector<int>(problem.getNVar(),0);
   }
   
   Solution::~Solution(){
     this->X.clear();
   }
 
-  void Solution::setDecisionVars(std::vector<int> & dvars){
+  void Solution::setDecisionVars(std::vector<int> dvars){
     if (this->X.size() != dvars.size()){
       cerr<<"ERR: Cannot set decision vars, seems to belong to another problem (dvars="<<dvars<<")!!"<<endl;
       throw 50;
     }
     for(unsigned int i=0;i<this->X.size();i++){
-      this.X.at(i)=dvars.at(i);
+      this->X.at(i)=dvars.at(i);
     }
   }
 
@@ -86,7 +84,7 @@ namespace kbest{
   }
 
   void SolutionList::insertAt(int i, Solution & sol){
-    std::vector<Solution &>::iterator it;
+    std::vector<Solution>::iterator it;
     it = this->slist.begin() + i;
     it = this->slist.insert(it, sol);
   }
@@ -96,9 +94,9 @@ namespace kbest{
   }
 
   int SolutionList::getInsertionIndex(Solution & sol){
-    int mid=-1
-    int lo = 0 ;
-    int hi = this->size();
+    int mid=-1;
+    int lo=0;
+    int hi=this->size();
     while (lo < hi) {
         mid=(lo+hi)/2;
         if (sol.V > this->slist.at(mid).V) { 
@@ -132,6 +130,46 @@ namespace kbest{
 
   int SolutionList::size(){
     return this->slist.size();
+  }
+
+
+
+  bool operator < (const Solution & sol0, const Solution & sol){
+      return sol0.V < sol.V;
+  }
+
+  bool operator == (const Solution & sol0, const Solution sol){
+      return sol0.V==sol.V && sol0.J==sol.J && sol0.T==sol.T;
+  }
+
+  ostream & operator <<(ostream & os, Solution & sol){
+      os<<"{ V="<<sol.V<<", J="<<sol.J<<", T="<<sol.V<<", C="<<sol.C<<", X="<<sol.X<<" }";
+      return os;
+  }
+
+  ostream & operator << (ostream & os, SolutionList & sl){
+      os<<"[ ";
+      for (int i=0; i<sl.size(); i++){
+        os<<sl.get(i);
+        if (i<sl.size()-1){
+          os<<", ";
+        }
+      }
+      os<<" ]";
+     return os;
+  }
+
+  std::vector<int> operator + ( std::vector<int> & v1, std::vector<int> & v2 ){  
+    if (v1.size()!= v2.size()) {
+      cerr<<"Cannot sum two vecto of different size !"<<endl;
+      throw 40;
+    }
+    int sz=v1.size();
+    std::vector<int> result= std::vector<int>(sz);
+    for (unsigned int i = 0; i<sz; i++){
+      result[i]=v1[i]+v2[i];
+    }
+    return result;
   }
 
 

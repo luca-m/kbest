@@ -12,6 +12,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <limits>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -25,6 +29,11 @@ namespace kbest{
   class Problem{
   
     public:
+
+      /**
+       * Create a sample problem.
+       **/
+      Problem();
       /**
        * Create a new void problem
        *
@@ -81,7 +90,7 @@ namespace kbest{
       /**
        * Returns the matrix associated to the problem
        * */
-      kbest::Matrix * getAssociatedMatrix();
+      kbest::Matrix getAssociatedMatrix();
 
     private:
  
@@ -90,18 +99,15 @@ namespace kbest{
       /// Capacity
       int b;
       /// Variable vector: <Weight,Cost>
-      std::vector<std::pair<int,int>> vars;
+      std::vector<std::pair<int,int> > vars;
   
   };
 
   /**
   * Pretty printing for Problem
   */
-  ostream & operator << (ostream & os, const Problem & prob){
-      os<<"{ nvar="<<prob.nvar<<", b="<<prob.b<<" }";
-      return os;
-  }
-
+  ostream & operator << (ostream & os, Problem & prob);
+  
 }
 
 #endif /* !PROBLEM_H */

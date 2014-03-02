@@ -70,7 +70,7 @@ namespace kbest{
 
     private:
       /// The matrix
-      int mtx *;
+      int * mtx;
       /// Number of rows
       int rows;
       /// Number of coloumns
@@ -79,15 +79,14 @@ namespace kbest{
   };
 
   /**
+  * Pretty printing for Vector Int
+  */
+  ostream & operator << (ostream & os,  std::vector<int> & vec);
+  /**
   * Pretty printing for Matrix
   */
-  ostream & operator << (ostream & os, const kbest::Matrix & mtx){
-      for(int r=0; r<mtx.getNRows(); r++){
-        os<<"r="<<r<<" [ "<<mtx.getRow(r)<<" ]"<<endl;
-      }
-      return os;
-  }
-
+  ostream & operator << (ostream & os,  kbest::Matrix & mtx);
+  
 }
 
 #endif /* !MATRIX_H */

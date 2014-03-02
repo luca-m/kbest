@@ -7,35 +7,40 @@
 
 #include "Problem.h"
 
-#include <iostream>
-#include <algorithm>
-#include <limits>
-
-#include <fstream>
-#include <sstream>
-
 using namespace std;
 
 namespace kbest{
 
+  Problem::Problem(){
+      this->b=15;
+      this->nvar=5;
+      this->vars=std::vector<std::pair<int,int> >(this->nvar,std::make_pair(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()));
+      this->setVariable(0,4,3);
+      this->setVariable(1,3,4);
+      this->setVariable(2,5,5);
+      this->setVariable(3,7,6);
+      this->setVariable(4,8,7);
+    }
+
+
   Problem::Problem(int nvar, int b){
     this->b=b;
     this->nvar=nvar;
-    this->vars=std::vector(this->nvar,std::make_pair(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()));
+    this->vars=std::vector<std::pair<int,int> >(this->nvar,std::make_pair(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()));
   }
 
   Problem::Problem(std::string filePath){
     std::ifstream infile(filePath.c_str());
     std::string line;
     this->nvar=0;
-    this->b=0
+    this->b=0;
     int dummyVarNum=0;
 
     if (std::getline(infile, line)){
       std::istringstream iss_numvar(line);
       iss_numvar>>this->nvar;
-      this->vars=std::vector(this->nvar, std::make_pair(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
-      nread=0
+      this->vars=std::vector<std::pair<int,int> > (this->nvar, std::make_pair(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
+      int nread=0;
       while (std::getline(infile, line) && nread<this->nvar){
           std::istringstream iss(line);
           if (!(iss >> dummyVarNum >> this->vars.at(nread).second >> this->vars.at(nread).first)) { 
@@ -58,12 +63,12 @@ namespace kbest{
     std::sort(this->vars.begin(),this->vars.end());
   }
   
-  ~Problem::Problem(){
+  Problem::~Problem(){
     this->vars.clear();
   }
   
   void Problem::setVariable(int i, int cost, int weight){
-    if (i>=0 && i<this->c.size() && i<this->a.size()){
+    if (i >= 0 && i < this->vars.size() && i < this->vars.size()){
       if (cost < 0 || weight < 0){
         cerr<<"ERR: Cost or Weight of the variable are < 0 !! cost="<<cost<<", weight="<<weight<<endl;
         throw 20;
@@ -77,11 +82,11 @@ namespace kbest{
   }
 
   void Problem::setVariable1Based(int i, int cost, int weight){
-    this->addVariable(i-1, cost, weight);
+    this->setVariable(i-1, cost, weight);
   }
   
   int Problem::getC(int i){
-    if (i>=0 && i<this->c.size()){
+    if (i >= 0 && i < this->vars.size()){
       return this->vars.at(i).second;
     } else {
       cerr<<"ERR: variable index out of valid range: i="<<i<<endl;
@@ -94,7 +99,7 @@ namespace kbest{
   }
   
   int Problem::getA(int i){
-    if (i>=0 && i<this->a.size()){
+    if (i >= 0 && i < this->vars.size()){
       return this->vars.at(i).first;
     } else {
       cerr<<"ERR: variable index out of valid range: i="<<i<<endl;
@@ -123,6 +128,11 @@ namespace kbest{
   kbest::Matrix Problem::getAssociatedMatrix(){
     kbest::Matrix mtx = kbest::Matrix(this->b+1, this->nvar);
     return mtx;
+  }
+
+  ostream & operator << (ostream & os, Problem & prob){
+      os<<"{ nvar="<<prob.getNVar()<<", b="<<prob.getCapacity()<<" }";
+      return os;
   }
 
 }

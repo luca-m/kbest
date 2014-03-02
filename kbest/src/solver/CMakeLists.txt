@@ -1,6 +1,8 @@
 
-add_executable(kbest_cli KBest_cli.cpp  KBest.cpp  KBest.h  
-                          Matrix.cpp  Matrix.h  Problem.cpp  Problem.h  
+add_executable(kbest_cli KBest_cli.cpp  
+                          KBest.cpp  KBest.h  
+                          Matrix.cpp  Matrix.h  
+                          Problem.cpp  Problem.h  
                           Solution.cpp  Solution.h)
 INSTALL(TARGETS kbest_cli DESTINATION ${BIN_DIR})
 

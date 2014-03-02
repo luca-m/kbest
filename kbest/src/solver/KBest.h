@@ -9,8 +9,8 @@
 #define KBEST_H
 
 #include "Matrix.h"
-#include "Problem.h"
 #include "Solution.h"
+#include "Problem.h"
 
 namespace kbest{
 
@@ -74,12 +74,12 @@ namespace kbest{
       /// Problem matricial representation
       kbest::Matrix M;
       /// Problem
-      kbest::Problem & prob;
+      kbest::Problem prob;
       /// K-best
       int k;
       /// index of found solutions
       int p;
-      
+
   };
 
 

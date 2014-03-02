@@ -11,8 +11,7 @@
 #include "Problem.h"
 #include <vector>
 #include <iostream>
-
-using namespace std;
+#include <algorithm>
 
 namespace kbest{
 
@@ -47,7 +46,7 @@ namespace kbest{
       /**
       * Set the decision variables
       */
-      void setDecisionVars(std::vector<int> & dvars);
+      void setDecisionVars(std::vector<int> dvars);
 
     private:
 
@@ -68,7 +67,7 @@ namespace kbest{
       * 
       * @param estimated number of elements that will be inserted in the list
       */
-      SolutionList(int estimatedElements)
+      SolutionList(int estimatedElements);
       /**
       *
       */
@@ -118,7 +117,7 @@ namespace kbest{
       *
       * @param insertion index
       */
-      void insertAt1Based(int i, Solution & sol);
+      void insertAt1Based(int i, Solution &sol);
       /**
       *
       * @param Solution to insert
@@ -127,8 +126,9 @@ namespace kbest{
       /**
       *
       * @param Solution List to merge
+      * @param maximum number of element ot merge
       */
-      void merge(SolutionList & solList);
+      void merge(SolutionList & solList, int maxElements);
       /**
       * Return the number of Solutions in the list
       */
@@ -136,57 +136,30 @@ namespace kbest{
 
     private:
       /// Solution Vector
-      std::vector<Solution &> slist;
+      std::vector<Solution> slist;
 
   };
 
   /**
   * Less operator. This make Solution sortable.
   */
-  bool operator < (const Solution & sol) const{
-      return this->V < sol.V;
-  }
+  bool operator < (const Solution & sol0, const Solution & sol);
   /**
   * Equal operator.
   */
-  bool operator == (const Solution & sol) const{
-      return this->V==sol.V && this->J==sol.J && this->T==sol.T;
-  }
+  bool operator == (const Solution & sol0, const Solution sol);
   /**
   * Pretty printing for Solution
   */
-  ostream & operator <<(ostream & os, const Solution & sol){
-      os<<"{ V="<<sol.V<<", J="<<sol.J<<", T="<<sol.V<<", C="<<sol.C<<", X="<<sol.X<<" }";
-      return os;
-  }
+  ostream & operator <<(ostream & os, Solution & sol);
   /**
   * Pretty printing for SolutionList
   */
-  ostream & operator << (ostream & os, const SolutionList & sl){
-      os<<"[ ";
-      for (int i=0; i<sl.size(); i++){
-        os<<sl.get(i);
-        if (i<sl.size()-1){
-          os<<", ";
-        }
-      }
-      os<<" ]";
-     return os;
-  }
+  ostream & operator << (ostream & os, SolutionList & sl);
   /**
   * Definition of "+" operator for vector if integers
   */
-  std::vector<int> operator + (const std::vector<int> & v1, const std::vector<int> & v2 ){  
-    if (v1.size()!= v2.size()) {
-      cerr<<"Cannot sum two vecto of different size !"<<endl;
-      throw 40;
-    }
-    std::vector<int> result(v1.size());
-    for (unsigned int i = 0; i<result.size(); i++){
-      result[i]=v1[i]+v2[i];
-    }
-    return result;
-  }
+  std::vector<int> operator + ( std::vector<int> & v1, std::vector<int> & v2 );
 
 }
 
