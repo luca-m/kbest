@@ -105,7 +105,9 @@ namespace kbest{
   int Problem::getA1Based(int i){
     return this->getA(i-1);
   }
-  
+  int Problem::getNVar(){
+    return this->nvar;
+  }
   int Problem::getCapacity(){
     return this->b;
   }
@@ -119,8 +121,8 @@ namespace kbest{
   }
 
   kbest::Matrix Problem::getAssociatedMatrix(){
-    kbest::Matrix * mtx = new kbest::Matrix(this->b+1, this->nvar);
-    return *mtx;
+    kbest::Matrix mtx = kbest::Matrix(this->b+1, this->nvar);
+    return mtx;
   }
 
 }

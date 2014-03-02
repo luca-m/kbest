@@ -42,24 +42,12 @@ namespace kbest{
       int T;
       /// Has been checked
       bool C;
+      /// Decision variables
       std::vector<int> X;
       /**
       * Set the decision variables
       */
-      void setDecisionVars(std::vector<int> dvars);
-
-      /**
-      * Less operator. This make Solution sortable.
-      */
-      bool operator < (const Solution & sol) const{
-          return this->V < sol.V;
-      }
-      /**
-      * Equal operator.
-      */
-      bool operator == (const Solution & sol) const{
-          return this->V==sol.V && this->J==sol.J && this->T==sol.T;
-      }
+      void setDecisionVars(std::vector<int> & dvars);
 
     private:
 
@@ -77,52 +65,70 @@ namespace kbest{
       */
       SolutionList();
       /**
+      * 
+      * @param estimated number of elements that will be inserted in the list
+      */
+      SolutionList(int estimatedElements)
+      /**
       *
       */
       ~SolutionList();
-      
+
       /**
       * Sort in non increasing order
       */
       void sortNonIncreasing();
-      
+      /**
+      * Sort in non increasing order a slice
+      * @param begin index
+      * @param end index
+      */
+      void sortNonIncreasing(int begin, int end);
       /**
       * @param index of the solution to retrieve
       */
-      Solution & get(int index);
+      Solution & get(int i);
+      /**
+      * Retrieve last Solution
+      */
+      Solution & getLast();      
       /**
       * @param index of the solution to retrieve
       */
-      Solution & get1Based(int index);
+      Solution & get1Based(int i);
+      /**
+      * @param Solution to check
+      */
+      bool isIn(Solution & sol);
       /**
       * @param Solution to add
       */
-      int addSolution(Solution sol);
+      void addSolution(Solution & sol);
       /**
       *
       * @param Solution to insert
       */
-      int insertSorted(Solution sol);
+      void insertSorted(Solution & sol);
       /**
       *
       * @param insertion index
       */
-      int insertAt(int index, Solution sol);
+      void insertAt(int i, Solution & sol);
       /**
       *
       * @param insertion index
       */
-      int insertAt1Based(int index, Solution sol);
+      void insertAt1Based(int i, Solution & sol);
       /**
       *
       * @param Solution to insert
       */
-      int getInsertionIndex(Solution sol);
+      int getInsertionIndex(Solution & sol);
       /**
       *
       * @param Solution List to merge
       */
-      int merge(SolutionList solList);
+      void merge(SolutionList & solList);
       /**
       * Return the number of Solutions in the list
       */
@@ -130,16 +136,47 @@ namespace kbest{
 
     private:
       /// Solution Vector
-      std::vector<Solution> slist;
+      std::vector<Solution &> slist;
 
   };
 
-
-
+  /**
+  * Less operator. This make Solution sortable.
+  */
+  bool operator < (const Solution & sol) const{
+      return this->V < sol.V;
+  }
+  /**
+  * Equal operator.
+  */
+  bool operator == (const Solution & sol) const{
+      return this->V==sol.V && this->J==sol.J && this->T==sol.T;
+  }
+  /**
+  * Pretty printing for Solution
+  */
+  ostream & operator <<(ostream & os, const Solution & sol){
+      os<<"{ V="<<sol.V<<", J="<<sol.J<<", T="<<sol.V<<", C="<<sol.C<<", X="<<sol.X<<" }";
+      return os;
+  }
+  /**
+  * Pretty printing for SolutionList
+  */
+  ostream & operator << (ostream & os, const SolutionList & sl){
+      os<<"[ ";
+      for (int i=0; i<sl.size(); i++){
+        os<<sl.get(i);
+        if (i<sl.size()-1){
+          os<<", ";
+        }
+      }
+      os<<" ]";
+     return os;
+  }
   /**
   * Definition of "+" operator for vector if integers
   */
-  std::vector<int> operator + (const std::vector<int>& v1, const std::vector<int>& v2 ){  
+  std::vector<int> operator + (const std::vector<int> & v1, const std::vector<int> & v2 ){  
     if (v1.size()!= v2.size()) {
       cerr<<"Cannot sum two vecto of different size !"<<endl;
       throw 40;

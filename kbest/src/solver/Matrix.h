@@ -9,12 +9,17 @@
 #define MATRIX_H
 
 #include <vector>
+#include <iostream>
+
+using namespace std;
 
 namespace kbest{
 
 
   class Matrix{
     public:
+
+      Matrix();
 
       Matrix(int rows, int cols);
 
@@ -64,14 +69,24 @@ namespace kbest{
       std::vector<int> getRow1Based(int r);
 
     private:
- 
+      /// The matrix
       int mtx *;
-
+      /// Number of rows
       int rows;
-
+      /// Number of coloumns
       int cols;
 
   };
+
+  /**
+  * Pretty printing for Matrix
+  */
+  ostream & operator << (ostream & os, const kbest::Matrix & mtx){
+      for(int r=0; r<mtx.getNRows(); r++){
+        os<<"r="<<r<<" [ "<<mtx.getRow(r)<<" ]"<<endl;
+      }
+      return os;
+  }
 
 }
 

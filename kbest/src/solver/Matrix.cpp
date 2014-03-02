@@ -7,12 +7,16 @@
 
 #include "Matrix.h"
 
-#include <iostream>
-
 using namespace std;
 
 namespace kbest{
-      
+  
+  Matrix::Matrix(){
+    this->mtx= NULL
+    this->rows=0;
+    this->cols=0;
+  }
+
   Matrix::Matrix(int rows, int cols){
     this->mtx= * new int[rows * cols];
     this->rows=rows;
@@ -23,7 +27,9 @@ namespace kbest{
   }
 
   Matrix::~Matrix(){
-    delete mtx;
+    if (mtx != NULL){
+      delete mtx;
+    }
   }
       
   int Matrix::getNRows(){

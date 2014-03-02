@@ -11,6 +11,9 @@
 #include "Matrix.h"
 #include <vector>
 #include <string>
+#include <iostream>
+
+using namespace std;
 
 namespace kbest{
 
@@ -63,6 +66,10 @@ namespace kbest{
        * */
       int getA1Based(int i);
       /**
+       * Return the number of variables associated to the problem
+       * */
+      int getNVar();
+      /**
        * Return the capacity associated to the problem
        * */
       int getCapacity();
@@ -74,7 +81,7 @@ namespace kbest{
       /**
        * Returns the matrix associated to the problem
        * */
-      kbest::Matrix getAssociatedMatrix();
+      kbest::Matrix * getAssociatedMatrix();
 
     private:
  
@@ -86,6 +93,14 @@ namespace kbest{
       std::vector<std::pair<int,int>> vars;
   
   };
+
+  /**
+  * Pretty printing for Problem
+  */
+  ostream & operator << (ostream & os, const Problem & prob){
+      os<<"{ nvar="<<prob.nvar<<", b="<<prob.b<<" }";
+      return os;
+  }
 
 }
 
