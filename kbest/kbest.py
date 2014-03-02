@@ -252,14 +252,6 @@ class KBestSolver(object):
 
             if self.p<self.k:
               self.p+=1
-            #f=self.p
-            #while f>g:
-            #  self.L[f]=self.L[f-1]
-            #  f-=1
-            
-            #self.L[g].V=self.M[t,s]+zcum
-            #self.L[g].J=self.L[i].J
-            #self.L[g].T=self.L[i].T
             
             current_sol=Solution(problem=self.prob)
             current_sol.V=self.M[t,s]
@@ -285,11 +277,7 @@ class KBestSolver(object):
               if self.p<self.k:
                 self.p+=1
               self.L.insert(kk,current_sol)
-              #f=self.p
-              #while(f>kk):
-              #  self.L[f]=self.L[f-1]
-              #  f-=1
-              #self.L[kk]=auxl1
+
 
 
   def _backtracking(self, current_sol, sol_index, alternative=True):
@@ -303,6 +291,7 @@ class KBestSolver(object):
     zcum=0
     if LOGGER.isEnabledFor(logging.DEBUG):
       LOGGER.debug('backtracking current_sol: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
+    
     while t>0:
       t-=self.prob.a[j]
       z-=self.prob.c[j]
@@ -311,7 +300,6 @@ class KBestSolver(object):
       if LOGGER.isEnabledFor(logging.DEBUG):
         LOGGER.debug('backtracking current_sol: j={}, auxj.X={}'.format(j,current_sol.getDecisionVars()))
       if z==0:
-        #logging.debug('backtracking root: t={}, z={}, j={}, M[t,:]={}'.format(t,z,j,self.M[t,:]))
         break
       
       # j = {s: M[t,s] = z , 1 <= s <= j}
@@ -320,6 +308,7 @@ class KBestSolver(object):
           j=jj
           if LOGGER.isEnabledFor(logging.DEBUG):
             LOGGER.debug('backtracking sol: z={} found at {} in M[{},{}]={}'.format(z,j,t,j,self.M[t,1:]))
+
       if t>0 and alternative:
         self._searchAltSol(t, j, zcum, j1, sol_index)
       j1=j
@@ -361,8 +350,8 @@ class KBestSolver(object):
           if sol in self.L:
             logging.debug('buildInitKBest: (L) duplicate found {}'.format(sol))
           else:
-            logging.debug('buildInitKBest: found solution with value {} .i={}, j={} (L)'.format(self.M[i,j],i,j))
             counter+=1
+            logging.debug('buildInitKBest: found solution with value {} .i={}, j={}, counter={}, k={} (L)'.format(self.M[i,j],i,j,counter,self.k))
             self.L.append(sol)  
           if counter==self.k:
             i1=i; j1=j
@@ -411,30 +400,28 @@ class KBestSolver(object):
         # Merging:
         # Using L and L1 build sorted list of k objects having largest value V 
         # and put those values in L[0:k]
-        #logging.debug('buildInitKBest: merging\nL=\n{}\nL1=\n{}'.format('\n'.join([str(x) for x in L]),'\n'.join([str(x) for x in L1])))
         x=1; y=1; z=1
         mergedL=list1()
+
         while x<len(self.L)+1 and y<len(L1)+1 and z<self.k+1:
           if self.L[x].V>L1[y].V:
             sol=self.L[x]; x+=1
           else:
             sol=L1[y]; y+=1
-          #if sol:# not in mergedL:
           mergedL.append(sol)
           z+=1
+
         while x<len(self.L)+1 and z<self.k+1:
-          #if self.L[x]:# not in mergedL:
           mergedL.append(self.L[x]); z+=1
           x+=1
+
         while y<len(L1)+1 and z<self.k+1:
-          #if L1[y]:# not in mergedL:
           mergedL.append(L1[y]); z+=1
           y+=1
         
         for xx in xrange(1,self.k+1):
           self.L[xx]=mergedL[xx]
         
-        #logging.debug('buildInitKBest: i1={}, a1={}, j1={}'.format(i1,prob.a[1],j1))
         if i1>self.prob.a[1] or j1>1:
           fim=True
     
@@ -473,10 +460,10 @@ class KBestSolver(object):
         tmp=np.where(valid_values)
         m=min(tmp[0])
         if LOGGER.isEnabledFor(logging.DEBUG):
-          LOGGER.debug('forward: M[{},:]={} min found at {}'.format(t,self.M[t,1:],m,tmp))
+          logging.debug('forward: M[{},:]={} min found at {}'.format(t,self.M[t,1:],m,tmp))
       else:
         if LOGGER.isEnabledFor(logging.DEBUG):
-          LOGGER.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,self.M[t,1:]))
+          logging.debug('forward: x>=0 NOT found in M[{},:{}]={}'.format(t,j,self.M[t,1:]))
         continue
       
       z=self.M[t,m]
@@ -506,7 +493,8 @@ class KBestSolver(object):
     forward_time_stop=time.clock()
     
     if LOGGER.isEnabledFor(logging.DEBUG):
-      LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+      #LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+      logging.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
     
     backward_time_start=time.clock()
     self._backtrack()
