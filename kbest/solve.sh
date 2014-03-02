@@ -35,7 +35,7 @@ usage() {
   exit 2
 }
 
-solve_problem_list() {
+solve_problem_list_python() {
 	K_BEG=$1
 	K_INC=$2
 	K_END=$3
@@ -80,7 +80,7 @@ do
 	echoerr "INFO: Processing problem list $INDEX/$TOTAL"
 	plist_path="$PROBLEM_DIR/$plist"
 	out_path="$OUT_DIR/$plist.solved"
-	solve_problem_list "$K_BEGIN" "$K_INCREMENT" "$K_END" "$plist_path" "$out_path" &
+	solve_problem_list_python "$K_BEGIN" "$K_INCREMENT" "$K_END" "$plist_path" "$out_path" &
 	PIDS+=($!)
 	((INDEX++))
 	((NPROC++))

@@ -226,7 +226,7 @@ class KBestSolver(object):
   '''
 
   def __init__(self):
-    self.stats={'forward':0, 'backward':0}
+    self.stats={'forward':0.0, 'backward':0.0, 'total':0.0}
 
   #
   # K-Best: Backtracking
@@ -514,6 +514,7 @@ class KBestSolver(object):
     
     self.stats['forward']= (forward_time_stop-forward_time_start)
     self.stats['backward']= (backward_time_stop-backward_time_start)
+    self.stats['total']= self.stats['backward']+self.stats['forward']
     
     return list(self.L[:self.k+1])
 
@@ -540,8 +541,8 @@ def print_solutions(slist):
 def print_performance(prob, k, stats=dict(), header=False):
   assert issubclass(type(prob), Problem)
   if header:
-    print('# nvar, b, k, forward_time, backward_time')
-  print('{}, {}, {}, {}, {}'.format(prob.n, prob.b, k, stats['forward'], stats['backward']))
+    print('# nvar, b, k, forward_time, backward_time, total_time')
+  print('{}, {}, {}, {}, {}, {}'.format(prob.n, prob.b, k, stats['forward'], stats['backward'], stats['total']))
   
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
@@ -570,7 +571,7 @@ if __name__=='__main__':
   else:
     for p in args.prob:
       problems.append(Problem.problemFromFile(p))
-  first=True
+  first=False
   kbs=KBestSolver()
   for prob in problems:
     for r in xrange(args.repeat):
