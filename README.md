@@ -1,10 +1,12 @@
 Knapsack K-Best
 ===============
 
-_ 1-D Knapsack K-best solution porblem solver _
+_1-D Knapsack K-best solution porblem solver_
 
 Author: luca.mell@studio.unibo.it
+
 Status: Experimental
+
 Copyleft: [CC-BY-NC 2014](http://creativecommons.org/licenses/by-nc/4.0/)
 
 - - - - - - - - - - - - - - - -
@@ -12,11 +14,12 @@ Copyleft: [CC-BY-NC 2014](http://creativecommons.org/licenses/by-nc/4.0/)
 # Introduction
 
 Class project of 'Metodi e Modelli per il Supporto alle Decisioni'. 
+
 The goal of the project is to  implement the algorithm published in the paper [An Algorithm For Determining The K-Best Solutions Of The One-Dimensional Knapsack Problem](http://dx.doi.org/10.1590/S0101-74382000000100011) for retrieving the k-best solutions in a monodimensional knapsack problem (aka KKP).
 
 - - - - - - - - - - - - - - - -
 
-# Getting Started
+### Getting Started
 
 TBD
 
