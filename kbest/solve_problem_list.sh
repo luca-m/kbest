@@ -52,6 +52,23 @@ solve_problem_list_python() {
 	done
 }
 
+solve_problem_list_cpp() {
+	K_BEG=$1
+	K_INC=$2
+	K_END=$3
+	listp="$4"
+	outp="$5"
+	touch $outp 2>/dev/null
+	echo "# nvar, b, k, forward_time, backward_time, total_time" > "$outp"
+	for k in `seq $K_BEG $K_INC $K_END`;
+	do
+	  while read prob;
+	  do
+	    ./kbest -p -k "$k" "$prob" >> "$outp"
+	  done < "$listp"
+	done
+}
+
 #
 # MAIN
 #

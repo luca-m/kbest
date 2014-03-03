@@ -11,8 +11,12 @@ INCLUDE_DIRECTORIES(${SRC_DIR})
 
 MESSAGE("Compiled binaries will be copied to : ${CMAKE_INSTALL_PREFIX} ")
 
-CONFIGURE_FILE(solve.sh "${BIN_DIR}/solve.sh" COPYONLY)
+CONFIGURE_FILE(solve_problem_list.sh "${BIN_DIR}/solve_problem_list.sh" COPYONLY)
+CONFIGURE_FILE(solve_problem_list.bat "${BIN_DIR}/solve_problem_list.bat" COPYONLY)
+CONFIGURE_FILE(problemlist.py "${BIN_DIR}/problemlist.py" COPYONLY)
 CONFIGURE_FILE(kbest.py "${BIN_DIR}/kbest.py" COPYONLY)
-CONFIGURE_FILE(plot.R "${BIN_DIR}/plot.R" COPYONLY)
+CONFIGURE_FILE(plots.R "${BIN_DIR}/plots.R" COPYONLY)
+
+add_definitions(-DDEBUG)
 
 add_subdirectory(src)
