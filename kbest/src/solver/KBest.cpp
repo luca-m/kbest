@@ -5,14 +5,14 @@
  * Distributed under terms of the CC-BY-NC license.
  */
 
-#include "KBest.h"
+#include <solver/KBest.h>
 
-#ifdef DEBUG 
-#define D(x) x
-#define DEBUG_STDERR(x) std::cerr<<x<<std::endl;
+#if DEBUG == 1 
+  #define D(x) x
+  #define DEBUG_STDERR(x) std::cerr<<x<<std::endl;
 #else 
-#define D(x)
-#define DEBUG_STDERR(x)
+  #define D(x)
+  #define DEBUG_STDERR(x)
 #endif
 
 namespace kbest{

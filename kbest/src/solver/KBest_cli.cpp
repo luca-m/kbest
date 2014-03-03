@@ -5,7 +5,7 @@
  * Distributed under terms of the CC-BY-NC license.
  */
 
-#include "KBest.h"
+#include <solver/KBest.h>
 
 #include <algorithm>
 #include <iostream>

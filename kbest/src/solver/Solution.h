@@ -8,7 +8,7 @@
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
-#include "Problem.h"
+#include <solver/Problem.h>
 #include <vector>
 #include <iostream>
 #include <algorithm>

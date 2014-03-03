@@ -8,7 +8,7 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
-#include "Matrix.h"
+#include <solver/Matrix.h>
 #include <vector>
 #include <string>
 #include <iostream>

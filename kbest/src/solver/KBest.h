@@ -8,9 +8,9 @@
 #ifndef KBEST_H
 #define KBEST_H
 
-#include "Matrix.h"
-#include "Solution.h"
-#include "Problem.h"
+#include <solver/Matrix.h>
+#include <solver/Solution.h>
+#include <solver/Problem.h>
 
 namespace kbest{
 

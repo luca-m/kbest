@@ -5,7 +5,15 @@
  * Distributed under terms of the CC-BY-NC license.
  */
 
-#include "Problem.h"
+#include <solver/Problem.h>
+
+#if DEBUG == 1 
+  #define D(x) x
+  #define DEBUG_STDERR(x) std::cerr<<x<<std::endl;
+#else 
+  #define D(x)
+  #define DEBUG_STDERR(x)
+#endif
 
 using namespace std;
 
@@ -38,10 +46,12 @@ namespace kbest{
 
     if (std::getline(infile, line)){
       std::istringstream iss_numvar(line);
+      DEBUG_STDERR("Problem: line for varnum = "<<line)
       iss_numvar>>this->nvar;
       this->vars=std::vector<std::pair<int,int> > (this->nvar, std::make_pair(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()));
       int nread=0;
       while (std::getline(infile, line) && nread<this->nvar){
+          DEBUG_STDERR("Problem: line for variable = "<<line)
           std::istringstream iss(line);
           if (!(iss >> dummyVarNum >> this->vars.at(nread).second >> this->vars.at(nread).first)) { 
             cerr<<"ERR: Cannot parse var cost and weight (line="<<nread<<")!!"<<endl;
@@ -49,7 +59,9 @@ namespace kbest{
           }
           nread++;
       }
-      if (std::getline(infile, line)){
+      DEBUG_STDERR("Problem: nread="<<nread<<" line="<<line)
+      if (line != string("")){
+        DEBUG_STDERR("Problem: line for capacity = "<<line)
         std::istringstream iss_capacity(line);
         iss_capacity>>this->b;
       } else {
