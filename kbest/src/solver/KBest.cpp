@@ -28,9 +28,26 @@ namespace kbest{
     this->prob=NULL;
     this->M=NULL;
     this->L=NULL;
+    this->fwd_start=0;
+    this->fwd_end=0;
+    this->bwd_start=0;
+    this->bwd_end=0;
+  }
+
+  float KBestSolver::getLastForwardTime(){
+    return ((float)(fwd_end-fwd_start))/CLOCKS_PER_SEC;
+  }
+
+  float KBestSolver::getLastBackwardTime(){
+    return ((float)(bwd_end-bwd_start))/CLOCKS_PER_SEC;
+  }
+
+  float KBestSolver::getLastTotalTime(){
+    return this->getLastForwardTime()+this->getLastBackwardTime();
   }
 
   SolutionList & KBestSolver::kbest(Problem & prob, int k){
+
     this->k=k;
     this->prob=&prob;
     this->M=&this->prob->getAssociatedMatrix();
@@ -40,15 +57,15 @@ namespace kbest{
       throw 40;
     }
 
-    // TODO: time
+    this->fwd_start = clock();
     this->forward();
-    // TODO: time
+    this->fwd_end = clock();
 
     DEBUG_STDERR("kbest: matrix after forward:"<<endl<<*this->M)
 
-    // TODO: time
+    this->bwd_start = clock();
     this->backward();
-    // TODO: time
+    this->bwd_end = clock();
 
     delete this->M;
 

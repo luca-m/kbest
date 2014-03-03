@@ -52,7 +52,7 @@ void print_solutions(SolutionList & slist, int k){
   }
 }
 
-void print_performance_csv_row(Problem & prob, int k, double forward_time, double backward_time ){
+void print_performance_csv_row(Problem & prob, int k, float forward_time, float backward_time ){
   //  nvar, b, k, forward_time, backward_time, total_time
   cout<<prob.getNVar()<<","<<prob.getCapacity()<<","<<k<<","<<forward_time<<","<<backward_time<<","<<forward_time+backward_time<<endl;
 }
@@ -119,9 +119,8 @@ int main(int argc, char *argv[]){
         string filename=*it;
         Problem prob=Problem(filename);
         SolutionList slist = kbs.kbest(prob, k);
-        // TODO: retrieve performance
         if (perf_only){
-          print_performance_csv_row(prob, k, -1.0, -1.0);
+          print_performance_csv_row(prob, k, kbs.getLastForwardTime(), kbs.getLastBackwardTime());
         } else {
           print_solutions(slist, k);
         }
@@ -135,9 +134,8 @@ int main(int argc, char *argv[]){
     Problem prob=Problem();
     try{
       SolutionList slist = kbs.kbest(prob, k);
-      // TODO: retrieve performance
       if (perf_only){
-        print_performance_csv_row(prob, k, -1.0, -1.0);
+        print_performance_csv_row(prob, k, kbs.getLastForwardTime(), kbs.getLastBackwardTime());
       } else {
         print_solutions(slist, k);
       }

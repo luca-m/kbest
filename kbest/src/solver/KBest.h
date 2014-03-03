@@ -11,6 +11,8 @@
 #include <solver/Matrix.h>
 #include <solver/Solution.h>
 #include <solver/Problem.h>
+#include <ctime>
+
 
 namespace kbest{
 
@@ -38,6 +40,18 @@ namespace kbest{
       * @param number of best solution to find 
       */
       SolutionList & kbest(Problem & prob, int k);
+      /**
+      * Retrieve the time spent in forward enumeration during the solving of the last Problem. (in secs)
+      */
+      float getLastForwardTime();
+      /**
+      * Retrieve the time spent in backward enumeration during the solving of the last Problem. (in secs)
+      */
+      float getLastBackwardTime();
+      /**
+      * Retrieve the time spent for solving the last Problem. (in secs)
+      */
+      float getLastTotalTime();
 
     protected:
 
@@ -92,6 +106,14 @@ namespace kbest{
       int k;
       /// index of found solutions
       int p;
+      /// 
+      clock_t fwd_start;
+      ///
+      clock_t fwd_end;
+      ///
+      clock_t bwd_start;
+      ///
+      clock_t bwd_end;
 
   };
 
