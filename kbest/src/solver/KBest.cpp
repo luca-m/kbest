@@ -17,8 +17,6 @@
 
 namespace kbest{
 
-  const Problem kDummyProblem=Problem(0,0);
-
   KBestSolver::KBestSolver(){
     this->prob=NULL;
     this->M=NULL;
