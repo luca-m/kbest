@@ -65,16 +65,18 @@ Building C++ solver in _Windows_:
     * Click `Browse Source` and select `C:\\pathToKBestFolder\kbest`
     * Click `Browse Build` and select `%USERPROFILE%\Desktop\kbestbuild`
     * Click `Configure` and:
-        * Building via NMake
-            * Select `NMake Makefiles`, go ahead and then `Generate`
+        * Building via __NMake__:
+            * Select `NMake Makefiles`, go ahead
             * Set `CMAKE_INSTALL_PREFIX=%USERPROFILE%\Desktop\kbestbins`
             * Set `CMAKE_BUILD_TYPE=Release`
+            * Click `Generate`
             * `cd %USERPROFILE%\Desktop\kbestbuild` 
             * `nmake & nmake install`
-        * Building via Visual Studio:
+        * Building via __Visual Studio__:
             * Select `Visual Studio X 20ZY`, go ahead and then `Generate`
             * Set `CMAKE_INSTALL_PREFIX=%USERPROFILE%\Desktop\kbestbins`
             * Set `CMAKE_BUILD_TYPE=Release`
+            * Click `Generate`
             * Go to `%USERPROFILE%\Desktop\kbestbuild`
             * Open `kbest.snl`
 
