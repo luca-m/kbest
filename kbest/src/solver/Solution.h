@@ -110,21 +110,20 @@ namespace kbest{
   class SolutionList{
     public:
       /**
-      *
+      * Create an empty Solution list
       */
       SolutionList();
       /**
-      * 
-      * @param estimated number of elements that will be inserted in the list
+      * Create an empty Solution list reserving space for further elements
+      * @param Estimated number of elements that will be inserted in the list
       */
       SolutionList(int estimatedElements);
       /**
-      *
       */
       ~SolutionList();
 
       /**
-      * Sort in non increasing order
+      * Sort current SolutionList in non increasing order
       */
       void sortNonIncreasing();
       /**
@@ -134,6 +133,7 @@ namespace kbest{
       */
       void sortNonIncreasing(int begin, int end);
       /**
+      * Retrieve a Solution
       * @param index of the solution to retrieve
       */
       Solution & get(int i);
@@ -142,6 +142,7 @@ namespace kbest{
       */
       Solution & getLast();      
       /**
+      * Retrieve a Solution
       * @param index of the solution to retrieve
       */
       Solution & get1Based(int i);
@@ -159,29 +160,33 @@ namespace kbest{
       */
       void insertSorted(Solution & sol);
       /**
-      *
-      * @param insertion index
+      * Insert a Solution at specified index
+      * @param Insertion index
+      * @param Solution to insert
       */
       void insertAt(int i, Solution & sol);
       /**
-      *
-      * @param insertion index
+      * Insert a Solution at specified index
+      * @param Insertion index
+      * @param Solution to insert
       */
       void insertAt1Based(int i, Solution &sol);
       /**
-      *
+      * Find the insertion index considering the current SolutionList sorted. 
       * @param Solution to insert
+      * @param Start search insertion index from specified position
       */
       int getInsertionIndex(Solution & sol, int startFrom);
       /**
-      *
+      * Find the insertion index considering the current SolutionList sorted. 
       * @param Solution to insert
+      * @param Start search insertion index from specified position
       */
       int getInsertionIndex1Based(Solution & sol, int startFrom);
       /**
-      *
+      * Merge two sorted SolutionLists, keep first values of the lists 
       * @param Solution List to merge
-      * @param maximum number of element ot merge
+      * @param Maximum number of element to merge
       */
       void merge(SolutionList & solList, int maxElements);
       /**

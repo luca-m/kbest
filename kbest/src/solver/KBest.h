@@ -26,11 +26,10 @@ namespace kbest{
     public:
 
       /**
-      *
+      * Create a K-Best Solver
       */
       KBestSolver();
       /**
-      *
       */
       ~KBestSolver();
       /**
@@ -43,27 +42,41 @@ namespace kbest{
     protected:
 
       /**
-      *
+      * Forward enumeration, it populate the matrix 
+      * representation of the problem and enumerate solution 
+      * from root to leaves.
       */
       void forward();
       /**
-      *
+      * Perform the backward enumeration of best solutions
       */
       void backward();
       /**
-      *
+      * Recover initial solution from matrix representation of the problem,
+      * It will populate the SolutionList associated with this instance of the solver. 
       */
       void builtInitKBest();
       /**
-      *
+      * Iterate SolutionList and perform backtracking in the Solution found in order to
+      * reconstruct decision variables associated to the Solutions.  
       */
       void recoverSol();
       /**
-      *
+      * Backtrack a solution for recovering associated decision variables and eventually
+      * search for alternative solution.
+      * @param Solution to consider
+      * @param Index of the considered Solution in SolutionList
+      * @param Check for alternative solution if needed
       */
       void backtracking(Solution & current_sol, int sol_index, bool alternative);
       /**
-      *
+      * Search for alternative solution starting from a particular node in the 
+      * matrix representation of the problem.
+      * @param Supernode index
+      * @param Node index
+      * @param Solution value accumulator
+      * @param Previous node index
+      * @param Minimum Solution index in SolutionList where to insert new Solutions 
       */
       void searchAltSol(int t, int j, int zcum, int j1, int sol_index);
 

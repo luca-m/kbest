@@ -18,11 +18,18 @@ namespace kbest{
 
   class Matrix{
     public:
-
+      /**
+       * Create a void matrix
+       * */
       Matrix();
-
+      /**
+       * Create a matrix
+       * @param number of rows
+       * @param number of coloumns
+       * */
       Matrix(int rows, int cols);
-
+      /**
+      **/
       ~Matrix();
       /**
        * Returns the number of rows
@@ -46,14 +53,16 @@ namespace kbest{
       int get1Based(int r, int c);
       /**
        * Set an element using 0-based index
-       * @param row index
-       * @param col index
+       * @param Row index
+       * @param Coloumn index
+       * @param Value to set
        * */
       int set(int r, int c, int value);
       /**
        * Set an element using 1-based index
-       * @param row index
-       * @param col index
+       * @param Row index
+       * @param Coloumn index
+       * @param Value to set
        * */
       int set1Based(int r, int c, int value);
 

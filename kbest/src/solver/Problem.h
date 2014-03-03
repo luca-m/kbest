@@ -31,7 +31,7 @@ namespace kbest{
     public:
 
       /**
-       * Create a sample problem.
+       * Create the sample problem from paper http://dx.doi.org/10.1590/S0101-74382000000100011
        **/
       Problem();
       /**
@@ -52,26 +52,36 @@ namespace kbest{
 
       /**
        * Set a variable of the problem using 0-based index
+       * @param Index
+       * @param Cost associated to the variable
+       * @param Weight of the variable
        * */
       void setVariable(int i, int cost, int weight);
       /** 
        * Set a variable of the problem using 1-based index
+       * @param Index
+       * @param Cost associated to the variable
+       * @param Weight of the variable
        */
       void setVariable1Based(int i, int cost, int weight);
       /**
        * Get cost of i-th var using 0-based index
+       * @param index
        * */
       int getC(int i);
       /**
        * Get cost of i-th var using 1-based index
+       * @param Index
        * */
       int getC1Based(int i);
       /**
        * Get weight of i-th var using 0-based index
+       * @param Index
        * */
       int getA(int i);
       /**
        * Get weight of i-th var using 1-based index
+       * @param Index
        * */
       int getA1Based(int i);
       /**
@@ -84,7 +94,7 @@ namespace kbest{
       int getCapacity();
       /**
        * Set the capacity associated to the problem
-       * @param Knapsack capacity
+       * @param Capacity associated to the Knapsack problem
        * */
       int setCapacity(int capacity);
       /**
