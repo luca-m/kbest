@@ -125,9 +125,9 @@ namespace kbest{
     this->b=capacity;
   }
 
-  kbest::Matrix Problem::getAssociatedMatrix(){
-    kbest::Matrix mtx = kbest::Matrix(this->b+1, this->nvar);
-    return mtx;
+  kbest::Matrix & Problem::getAssociatedMatrix(){
+    kbest::Matrix * mtx = new kbest::Matrix(this->b, this->nvar);
+    return *mtx;
   }
 
   ostream & operator << (ostream & os, Problem & prob){

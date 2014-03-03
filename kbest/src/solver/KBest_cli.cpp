@@ -17,18 +17,30 @@ using namespace kbest;
 
 void print_help(){
 
+  string help="\n"
+  "#### Knapsack K-Best Solver ####\n\n"
+  "  Implementation of the algorithm for solving 1-dimensional K-best Knapsack problem described in:\n"
+  "  'Yanasse, Soma, Maculan - An Algorithm For Determining The K-Best Solutions Of The One-Dimensional\n"
+  "  Knapsack Problem'"
+  "  See http://dx.doi.org/10.1590/S0101-74382000000100011\n"
+  "\n"
+  "Usage:\n"
+  "    ./kbest [-h] [-p] [--sample] [-k NUM] PROBLEMFILE + \n"
+  "\n";
+  cout<<help;
 }
 
 void print_solutions(SolutionList & slist, int k){
-
-
+  cout<<k<<"-best solutions found:"<<endl;
+  for(int i=0; i<k && i < slist.size(); i++){
+    cout<<slist.get(i)<<endl;
+  }
 }
 
 void print_performance_csv_row(Problem & prob, int k, double forward_time, double backward_time ){
   //  nvar, b, k, forward_time, backward_time, total_time
   cout<<prob.getNVar()<<","<<prob.getCapacity()<<","<<k<<","<<forward_time<<","<<backward_time<<","<<forward_time+backward_time<<endl;
 }
-
 
 string getCmdOption(vector<string>::iterator begin, vector<string>::iterator end, const std::string & option){
     vector<string>::iterator itr = std::find(begin, end, option);
@@ -44,6 +56,7 @@ bool cmdOptionExists(vector<string>::iterator begin, vector<string>::iterator en
 
 int main(int argc, char *argv[]){
   bool perf_only=false;
+  bool sample_only=false;
   int k=15;
   vector<string>::iterator i;
   vector<string>::iterator it;
@@ -69,6 +82,13 @@ int main(int argc, char *argv[]){
       i=it;
     }
   }
+  if(cmdOptionExists(args.begin(), args.end(), "--sample")){
+    sample_only=true;
+    it = std::find(args.begin(), args.end(), "--sample")+1;
+    if(it>i){
+      i=it;
+    }
+  }
   if (cmdOptionExists(args.begin(), args.end(), "-k")){
     k=atoi(getCmdOption(args.begin(), args.end(), "-k").c_str());
     it = std::find(args.begin(), args.end(), "-k")+2;
@@ -78,15 +98,37 @@ int main(int argc, char *argv[]){
   }
 
   KBestSolver kbs=KBestSolver();
-  for (; i < args.end(); ++i){
-    string filename=*it;
-    Problem prob=Problem(filename);
-    SolutionList slist = kbs.kbest(prob, k);
-    // TODO: retrieve performance
-    if (perf_only){
-      print_performance_csv_row(prob, k, -1.0, -1.0);
-    } else {
-      print_solutions(slist, k);
+  if (!sample_only){
+    for (; i < args.end(); ++i){
+      try{
+        string filename=*it;
+        Problem prob=Problem(filename);
+        SolutionList slist = kbs.kbest(prob, k);
+        // TODO: retrieve performance
+        if (perf_only){
+          print_performance_csv_row(prob, k, -1.0, -1.0);
+        } else {
+          print_solutions(slist, k);
+        }
+      } catch (int e) {
+        cerr<<"FATAL: exception "<<e<<""<<endl;
+        exit(-2);
+      }
+    }
+  }
+  else{
+    Problem prob=Problem();
+    try{
+      SolutionList slist = kbs.kbest(prob, k);
+      // TODO: retrieve performance
+      if (perf_only){
+        print_performance_csv_row(prob, k, -1.0, -1.0);
+      } else {
+        print_solutions(slist, k);
+      }
+    } catch (int e) {
+      cerr<<"FATAL: exception "<<e<<""<<endl;
+      exit(-2);
     }
   }
 

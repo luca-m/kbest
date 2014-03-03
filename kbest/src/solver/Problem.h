@@ -90,7 +90,7 @@ namespace kbest{
       /**
        * Returns the matrix associated to the problem
        * */
-      kbest::Matrix getAssociatedMatrix();
+      kbest::Matrix & getAssociatedMatrix();
 
     private:
  

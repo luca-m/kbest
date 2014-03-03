@@ -7,6 +7,14 @@
 
 #include "Matrix.h"
 
+#ifdef DEBUG 
+#define D(x) x
+#define DEBUG_STDERR(x) std::cerr<<x<<std::endl;
+#else 
+#define D(x)
+#define DEBUG_STDERR(x)
+#endif
+
 using namespace std;
 
 namespace kbest{
@@ -18,11 +26,16 @@ namespace kbest{
   }
 
   Matrix::Matrix(int rows, int cols){
-    this->mtx= new int[rows * cols];
-    this->rows=rows;
-    this->cols=cols;
-    for (int i=0;i<rows*cols;i++){
-      this->mtx[i]=-1;
+    if (rows>0 && cols>0 ){
+      this->mtx = new int[rows*cols];
+      this->rows=rows;
+      this->cols=cols;
+      for (int i=0;i<rows*cols;i++){
+        this->mtx[i]=-1;
+      }
+    }else{
+      cerr<<"ERR: matrix rows and cols must be >0: rows="<<rows<<",cols="<<cols<<endl;
+      throw 10;
     }
   }
 
@@ -41,8 +54,9 @@ namespace kbest{
   }
 
   int Matrix::get(int r, int c){
-    if (r>=0 && r<this->rows && c>=0 && c< this->cols){
-      return this->mtx[this->rows * r + c];
+    //DEBUG_STDERR("matrix: r "<<r<<", c "<<c)
+    if (r>=0 && r < this->rows && c>=0 && c < this->cols){
+      return this->mtx[this->cols * r + c];
     } else {
       cerr<<"ERR: matrix index out of valid range: r="<<r<<",c="<<c<<endl;
       throw 10;
@@ -55,7 +69,7 @@ namespace kbest{
   
   int Matrix::set(int r, int c, int value){
     if (r>=0 && r<this->rows && c>=0 && c< this->cols){
-      this->mtx[this->rows * r + c] = value;
+      this->mtx[this->cols * r + c] = value;
     } else {
       cerr<<"ERR: matrix index out of valid range: r="<<r<<",c="<<c<<endl;
       throw 10;
@@ -77,7 +91,6 @@ namespace kbest{
   std::vector<int> Matrix::getRow1Based(int r){
     return this->getRow(r-1);
   }
-
 
   ostream & operator << (ostream & os,  std::vector<int> & vec){
       for(int i=0; i < vec.size(); i++){

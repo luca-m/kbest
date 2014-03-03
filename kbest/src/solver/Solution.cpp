@@ -7,6 +7,14 @@
 
 #include "Solution.h"
 
+#ifdef DEBUG 
+#define D(x) x
+#define DEBUG_STDERR(x) std::cerr<<x<<std::endl;
+#else 
+#define D(x)
+#define DEBUG_STDERR(x)
+#endif
+
 namespace kbest{
 
   Solution::Solution(kbest::Problem & problem){
@@ -31,32 +39,88 @@ namespace kbest{
     }
   }
 
+  std::vector<int> & Solution::getDecisionVars(){
+    return this->X;
+    //std::vector<int> dvars(this->X.size());
+    //for (int i=0; i < this->X.size() ; i++){
+    //  dvars.push_back(this->X.at(i));
+    //}
+    //return dvars;
+  }
+    /**
+    *
+    */
+    void Solution::addDecisionVars(std::vector<int> dvars){
+      cerr<<"ERR: addDecisionVars not yet implemented!"<<endl;
+      throw 99;
+    }
+    /**
+    *
+    */
+    void Solution::incDecisionVar(int j){
+     if ( j >= 0 && j < this->X.size()){
+        this->X.at(j)++;
+      } else {
+        cerr<<"ERR: Cannot inc decision vars, out of range (j="<<j<<")!!"<<endl;
+        throw 50;
+      }
+    }
+    /**
+    *
+    */
+    void Solution::incDecisionVar1Based(int j){
+      this->incDecisionVar(j-1);
+    }
+
+
+  void Solution::setV(int v){this->V=v;}
+  
+  int Solution::getV(){return this->V;}
+
+  void Solution::setJ(int j) {this->J=j;}
+  
+  int Solution::getJ(){return this->J;}
+
+  void Solution::setT(int t){this->T=t;}
+  
+  int Solution::getT(){return this->T;}
+
+  void Solution::setC(bool c){this->C=c;}
+
+  bool Solution::getC(){return this->C;}
+
+
   SolutionList::SolutionList(){
-    this->slist.reserve(100);
+    this->slist = new std::vector<Solution>();
+    this->slist->reserve(100);
   }
 
   SolutionList::SolutionList(int estimatedElements){
-    this->slist.reserve(estimatedElements);
+    this->slist = new std::vector<Solution>();
+    this->slist->reserve(estimatedElements);
   }
 
 
   SolutionList::~SolutionList(){
-    this->slist.clear();
+    if (this->slist!=NULL){
+      this->slist->clear();
+      //delete this->slist;
+    }
   }
 
   void SolutionList::sortNonIncreasing(){
-    std::sort(this->slist.begin(), this->slist.end());
-    std::reverse(this->slist.begin(), this->slist.end());
+    std::sort(this->slist->begin(), this->slist->end());
+    std::reverse(this->slist->begin(), this->slist->end());
   }
 
   void SolutionList::sortNonIncreasing(int begin, int end){
-    std::sort(this->slist.begin()+begin, this->slist.begin()+end);
-    std::reverse(this->slist.begin()+begin, this->slist.begin()+end);
+    std::sort(this->slist->begin()+begin, this->slist->begin()+end);
+    std::reverse(this->slist->begin()+begin, this->slist->begin()+end);
   }
 
   Solution & SolutionList::get(int i){
-    if (i>=0 && i<this->slist.size()){
-      return this->slist.at(i);
+    if (i>=0 && i<this->slist->size()){
+      return this->slist->at(i);
     } else {
       cerr<<"ERR: variable index out of valid range: i="<<i<<endl;
       throw 10;
@@ -72,11 +136,19 @@ namespace kbest{
   } 
 
   bool SolutionList::isIn(Solution & sol){
-    return std::find(this->slist.begin(), this->slist.end(), sol) != this->slist.end();
+    if (this->slist==NULL){
+      cerr<<"ERR: solution list is NULL !"<<endl;
+      throw 40;
+    }
+    return std::find( this->slist->begin(), this->slist->end(), sol) != this->slist->end();
   }
 
   void SolutionList::addSolution(Solution & sol){
-    this->slist.push_back(sol);
+    if (this->slist==NULL){
+      cerr<<"ERR: solution list is NULL !"<<endl;
+      throw 40;
+    }
+    this->slist->push_back(sol);
   }
 
   void SolutionList::insertSorted(Solution & sol){
@@ -84,9 +156,14 @@ namespace kbest{
   }
 
   void SolutionList::insertAt(int i, Solution & sol){
+    if (this->slist==NULL){
+      cerr<<"ERR: solution list is NULL !"<<endl;
+      throw 40;
+    }
+    DEBUG_STDERR("SolutionList insert at i="<<i<<" of "<<this->slist->size())
     std::vector<Solution>::iterator it;
-    it = this->slist.begin() + i;
-    it = this->slist.insert(it, sol);
+    it = this->slist->begin() + i;
+    it = this->slist->insert(it, sol);
   }
 
   void SolutionList::insertAt1Based(int i, Solution & sol){
@@ -94,12 +171,17 @@ namespace kbest{
   }
 
   int SolutionList::getInsertionIndex(Solution & sol){
+    if (this->slist==NULL){
+      cerr<<"ERR: solution list is NULL !"<<endl;
+      throw 40;
+    }
+    DEBUG_STDERR("SolutionList finding insertion index ")
     int mid=-1;
     int lo=0;
     int hi=this->size();
     while (lo < hi) {
         mid=(lo+hi)/2;
-        if (sol.V > this->slist.at(mid).V) { 
+        if (sol.getV() > this->slist->at(mid).getV()) { 
           hi=mid;
         } else {
           lo=mid+1; 
@@ -112,8 +194,9 @@ namespace kbest{
     int x=0;
     int y=0; 
     int z=0;
+    DEBUG_STDERR("SolutionList merge")
     while ( x<this->size() && y<solList.size() and z<maxElements){
-      if ( this->get(x).V > solList.get(y).V ){
+      if ( this->get(x).getV() > solList.get(y).getV() ){
         x++;
       } else {
         this->insertAt(x, solList.get(y));
@@ -126,10 +209,15 @@ namespace kbest{
       z++;
       y++;
     }
+    DEBUG_STDERR("SolutionList end of merge")
   }
 
   int SolutionList::size(){
-    return this->slist.size();
+    if (this->slist==NULL){
+      cerr<<"ERR: solution list is NULL !"<<endl;
+      throw 40;
+    }
+    return this->slist->size();
   }
 
 
@@ -143,7 +231,7 @@ namespace kbest{
   }
 
   ostream & operator <<(ostream & os, Solution & sol){
-      os<<"{ V="<<sol.V<<", J="<<sol.J<<", T="<<sol.V<<", C="<<sol.C<<", X="<<sol.X<<" }";
+      os<<"{ V="<<sol.getV()<<", J="<<sol.getJ()<<", T="<<sol.getT()<<", C="<<sol.getC()<<", X="<<sol.getDecisionVars()<<" }";
       return os;
   }
 
@@ -152,7 +240,7 @@ namespace kbest{
       for (int i=0; i<sl.size(); i++){
         os<<sl.get(i);
         if (i<sl.size()-1){
-          os<<", ";
+          os<<", "<<endl;
         }
       }
       os<<" ]";

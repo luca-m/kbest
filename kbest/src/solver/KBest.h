@@ -70,11 +70,11 @@ namespace kbest{
     private:
 
       /// Backtracked Solution List
-      kbest::SolutionList L;
+      kbest::SolutionList * L;
       /// Problem matricial representation
-      kbest::Matrix M;
+      kbest::Matrix * M ;
       /// Problem
-      kbest::Problem prob;
+      kbest::Problem * prob;
       /// K-best
       int k;
       /// index of found solutions

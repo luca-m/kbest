@@ -33,6 +33,62 @@ namespace kbest{
       */
       ~Solution();
 
+      /**
+      * Set the decision variables
+      */
+      void setDecisionVars(std::vector<int> dvars);
+      /**
+      *
+      */
+      std::vector<int> & getDecisionVars();
+      /**
+      *
+      */
+      void addDecisionVars(std::vector<int> dvars);
+      /**
+      *
+      */
+      void incDecisionVar(int j);
+      /**
+      *
+      */
+      void incDecisionVar1Based(int j);
+
+      /**
+      *
+      */
+      void setV(int v);
+      /**
+      *
+      */
+      int getV();
+      /**
+      *
+      */
+      void setJ(int j);
+      /**
+      *
+      */
+      int getJ();
+      /**
+      *
+      */
+      void setT(int t);
+      /**
+      *
+      */
+      int getT();
+      /**
+      *
+      */
+      void setC(bool c);
+      /**
+      *
+      */
+      bool getC();
+
+    //protected:
+
       /// Solution Value
       int V;
       /// Supernode index
@@ -43,12 +99,6 @@ namespace kbest{
       bool C;
       /// Decision variables
       std::vector<int> X;
-      /**
-      * Set the decision variables
-      */
-      void setDecisionVars(std::vector<int> dvars);
-
-    private:
 
   };
 
@@ -136,7 +186,7 @@ namespace kbest{
 
     private:
       /// Solution Vector
-      std::vector<Solution> slist;
+      std::vector<Solution> * slist;
 
   };
 
