@@ -18,15 +18,30 @@ using namespace kbest;
 void print_help(){
 
   string help="\n"
-  "#### Knapsack K-Best Solver ####\n\n"
-  "  Implementation of the algorithm for solving 1-dimensional K-best Knapsack problem described in:\n"
-  "  'Yanasse, Soma, Maculan - An Algorithm For Determining The K-Best Solutions Of The One-Dimensional\n"
-  "  Knapsack Problem'"
-  "  See http://dx.doi.org/10.1590/S0101-74382000000100011\n"
-  "\n"
-  "Usage:\n"
+  " #### Knapsack K-Best Solver ####\n\n"
+  "---------------------- luca.mella@studio.unibo.it\n"
+  "    \n"
+  "    Implementation of the algorithm for solving 1-dimensional\n"
+  "    K-best Knapsack problem described in:\n"
+  "    'Yanasse, Soma, Maculan - An Algorithm For Determining \n"
+  "    The K-Best Solutions Of The One-Dimensional Knapsack Problem'\n"
+  "    \n"
+  "    See http://dx.doi.org/10.1590/S0101-74382000000100011\n"
+  " \n"
+  " Usage:\n"
+  " \n"
   "    ./kbest [-h] [-p] [--sample] [-k NUM] PROBLEMFILE + \n"
-  "\n";
+  " \n"
+  " Options:"
+  "\n"
+  "      -h         This help\n"
+  "      -p         Print out performance data only (no solution)\n"
+  "      -k         Number of best solution to find\n"
+  "      --sample   Run with sample problem from the paper\n"
+  " \n"
+  " Params:\n"
+  " \n"
+  "       PROBLEMFILE+  File where to load a 1-D knapsack problem\n";
   cout<<help;
 }
 
