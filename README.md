@@ -37,11 +37,11 @@ The expected usage of the project is:
 * Solving the list with the List Solver script (eg. `solve_problem_list.bat Desktop\problem_list\ Desktop\problem_list_performance\`)
 * Plotting performance data using Plot Tool (eg. `plot.R Desktop\problem_list_performance\filename.lis.solved.csv Desktop\plots`)
 
-Or also:
+Or:
 
 * Using Solver for printing Decision Variables of the solutions (eg. `kbest_cli.exe -k 15 problemfile.in`) 
 
-Or:
+Or also:
 
 * Using Solver for printing paper problem solutions (eg. `kbest_cli.exe --sample -k 15`)
 
