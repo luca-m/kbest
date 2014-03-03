@@ -172,7 +172,12 @@ namespace kbest{
       *
       * @param Solution to insert
       */
-      int getInsertionIndex(Solution & sol);
+      int getInsertionIndex(Solution & sol, int startFrom);
+      /**
+      *
+      * @param Solution to insert
+      */
+      int getInsertionIndex1Based(Solution & sol, int startFrom);
       /**
       *
       * @param Solution List to merge

@@ -152,7 +152,7 @@ namespace kbest{
   }
 
   void SolutionList::insertSorted(Solution & sol){
-    this->insertAt(this->getInsertionIndex(sol), sol);
+    this->insertAt(this->getInsertionIndex(sol, 0), sol);
   }
 
   void SolutionList::insertAt(int i, Solution & sol){
@@ -170,7 +170,7 @@ namespace kbest{
     this->insertAt(i-1, sol);
   }
 
-  int SolutionList::getInsertionIndex(Solution & sol){
+  int SolutionList::getInsertionIndex(Solution & sol, int startFrom){
     if (this->slist==NULL){
       cerr<<"ERR: solution list is NULL !"<<endl;
       throw 40;
@@ -179,6 +179,11 @@ namespace kbest{
     int mid=-1;
     int lo=0;
     int hi=this->size();
+    
+    if (startFrom>0 && startFrom < hi){
+      lo=startFrom;
+    }
+    
     while (lo < hi) {
         mid=(lo+hi)/2;
         if (sol.getV() > this->slist->at(mid).getV()) { 
@@ -189,6 +194,11 @@ namespace kbest{
     }
     return lo;
   }
+
+  int SolutionList::getInsertionIndex1Based(Solution & sol, int startFrom){
+    return this->getInsertionIndex(sol, startFrom -1) +1;
+  }
+
 
   void SolutionList::merge(SolutionList & solList, int maxElements){
     int x=0;

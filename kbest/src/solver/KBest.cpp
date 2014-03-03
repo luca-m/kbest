@@ -225,17 +225,18 @@ namespace kbest{
     int z=current_sol.getV();
     int zcum=0;
 
-    DEBUG_STDERR("backtracking: current_sol="<<current_sol)
+    //DEBUG_STDERR("backtracking: sol_index="<<sol_index<<", current_sol="<<current_sol)
+    DEBUG_STDERR("backtracking: current solution t="<<t<<", j="<<j<<", z="<<z<<", M[t,j]="<<this->M->get1Based(t, j))
+      
 
     while (t>0){
       t-=this->prob->getA1Based(j);
       z-=this->prob->getC1Based(j);
       zcum+=this->prob->getC1Based(j);
       current_sol.incDecisionVar1Based(j);
-      DEBUG_STDERR("backtracking: new iteration t="<<t<<", j="<<j<<", z="<<z)
+      DEBUG_STDERR("backtracking current_sol: j="<<j<<", current_sol.X="<<current_sol.getDecisionVars())
       
-      if ( t<1 || z==0 ) {
-        DEBUG_STDERR("backtracking: break")
+      if ( z<=0 ) {
         break;
       }
       
@@ -243,6 +244,7 @@ namespace kbest{
       for (int s=1; s < j+1; s++){
         if (this->M->get1Based(t,s)==z){
           j=s;
+          DEBUG_STDERR("backtracking sol: z="<<z<<" found at "<<j<<" in M["<<t<<",:"<<j<<"]=")
           break;
         }
       }
@@ -270,10 +272,10 @@ namespace kbest{
             alt_sol->setT(t);
             alt_sol->setJ(s);
 
-            int g=this->L->getInsertionIndex(*alt_sol);     // old: findInsertionIndex(this->L, alt_sol, startfrom=sol_index)
-            this->L->insertAt(g, *alt_sol);    // alternative solution is in pos g, now compute its value.
+            int g=this->L->getInsertionIndex1Based(*alt_sol, sol_index);     // old: findInsertionIndex(this->L, alt_sol, startfrom=sol_index)
+            this->L->insertAt1Based(g, *alt_sol);    // alternative solution is in pos g, now compute its value.
 
-            DEBUG_STDERR("searchAltSol: g="<<g<<", alt_sol="<<*alt_sol)
+            //DEBUG_STDERR("searchAltSol: g="<<g<<", alt_sol="<<*alt_sol)
 
             if (this->p < this->k){
               this->p++;
@@ -291,16 +293,16 @@ namespace kbest{
             vector<int> dvar2= current_sol->getDecisionVars();
             this->L->get1Based(g).setDecisionVars(dvar1 + dvar2);
             
-            DEBUG_STDERR("searchAltSol: current_sol="<<*current_sol<<endl<<"L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<"L[g="<<g<<"]="<<this->L->get1Based(g))
+            DEBUG_STDERR("searchAltSol:  alternative sol!"<<endl<<"  current_sol="<<*current_sol<<endl<<"  L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<"  L[g="<<g<<"]="<<this->L->get1Based(g))
 
             if (this->M->get1Based(t,s) >= this->L->get1Based(this->p).getV()) {
               // Determine position kk : kk>g to insert this alternative 
               // solution in ordered list L
-              int kk = this->L->getInsertionIndex(*current_sol); //Solution.findInsertionIndex(this->L, current_sol, startfrom=g)
+              int kk = this->L->getInsertionIndex1Based(*current_sol, g); //Solution.findInsertionIndex(this->L, current_sol, startfrom=g)
               if (this->p < this->k){
                 this->p++;
               }
-              this->L->insertAt(kk, *current_sol);
+              this->L->insertAt1Based(kk, *current_sol);
             }
           }
         }
