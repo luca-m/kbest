@@ -127,10 +127,16 @@ class Problem(object):
     self.c=np.zeros((self.n+1),dtype=int)
     self.a=np.zeros((self.n+1),dtype=int)
     self.b=b
+    self.vars=list()
   
   def addVariable(self, cost, weight):
-    self.a=np.append(self.a,[weight],0)
-    self.c=np.append(self.c,[cost],0)
+    self.vars.append( (weight,cost) )
+    self.vars.sort()
+    self.a=np.zeros( (1), dtype=int )
+    self.c=np.zeros( (1), dtype=int )
+    for we,co in self.vars:
+      self.a=np.append(self.a,[we],0)
+      self.c=np.append(self.c,[co],0)
     self.n+=1
 
   def __str__(self):
@@ -290,7 +296,7 @@ class KBestSolver(object):
     z=current_sol.V
     zcum=0
     if LOGGER.isEnabledFor(logging.DEBUG):
-      LOGGER.debug('backtracking current_sol: j={}, t={}, z={}, M[t,j]={}'.format(j,t,z,self.M[t,j]))
+      LOGGER.debug('backtracking current_sol: t={}, j={}, z={}, M[t,j]={}'.format(t,j,z,self.M[t,j]))
     
     while t>0:
       t-=self.prob.a[j]
