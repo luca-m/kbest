@@ -61,7 +61,7 @@ namespace kbest{
      if ( j >= 0 && j < this->X.size()){
         this->X.at(j)++;
       } else {
-        cerr<<"ERR: Cannot inc decision vars, out of range (j="<<j<<")!!"<<endl;
+        cerr<<"ERR: Cannot inc decision vars, out of range (j="<<j<<",nvars="<<this->X.size()<<")!!"<<endl;
         throw 50;
       }
     }
