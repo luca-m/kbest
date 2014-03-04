@@ -175,7 +175,7 @@ namespace kbest{
       cerr<<"ERR: solution list is NULL !"<<endl;
       throw 40;
     }
-    DEBUG_STDERR("SolutionList finding insertion index ")
+    DEBUG_STDERR("SolutionList finding insertion index ");
     int mid=-1;
     int lo=0;
     int hi=this->size();
@@ -204,8 +204,8 @@ namespace kbest{
     int x=0;
     int y=0; 
     int z=0;
-    DEBUG_STDERR("SolutionList merge")
-    while ( x<this->size() && y<solList.size() and z<maxElements){
+    DEBUG_STDERR("SolutionList merge");
+    while ( x<this->size() && y<solList.size() && z<maxElements){
       if ( this->get(x).getV() > solList.get(y).getV() ){
         x++;
       } else {
@@ -219,7 +219,7 @@ namespace kbest{
       z++;
       y++;
     }
-    DEBUG_STDERR("SolutionList end of merge")
+    DEBUG_STDERR("SolutionList end of merge");
   }
 
   int SolutionList::size(){

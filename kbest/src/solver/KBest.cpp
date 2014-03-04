@@ -60,7 +60,7 @@ namespace kbest{
     this->fwd_start = getRealTime();  //clock();
     this->forward();
     this->fwd_end = getRealTime();    //clock();
-    DEBUG_STDERR("kbest: matrix after forward:"<<endl<<*this->M)
+    DEBUG_STDERR("kbest: matrix after forward:"<<endl<<*this->M);
 
     this->bwd_start = getRealTime();  //clock();
     this->backward();
@@ -113,7 +113,7 @@ namespace kbest{
 
   void KBestSolver::backward(){
     this->builtInitKBest();
-    DEBUG_STDERR("backward: initial solution found"<<endl<<*this->L)
+    DEBUG_STDERR("backward: initial solution found"<<endl<<*this->L);
     this->recoverSol();
   }
 
@@ -137,17 +137,17 @@ namespace kbest{
 
         if (this->M->get1Based(i,j) >= 0){
 
-          DEBUG_STDERR("builtInitKBest: (L) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k)
+          DEBUG_STDERR("builtInitKBest: (L) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
           sol = new Solution(*this->prob);
           sol->setV(this->M->get1Based(i,j));
           sol->setT(i);
           sol->setJ(j);
           if (!this->L->isIn(*sol)) {
-            DEBUG_STDERR("builtInitKBest: (L) found solution "<<*sol<<"")
+            DEBUG_STDERR("builtInitKBest: (L) found solution "<<*sol<<"");
             counter++;
             this->L->addSolution(*sol);
           }else{
-            DEBUG_STDERR("builtInitKBest: (L) found duplicate solution "<<*sol<<"")
+            DEBUG_STDERR("builtInitKBest: (L) found duplicate solution "<<*sol<<"");
             delete sol;
           }
 
@@ -186,17 +186,17 @@ namespace kbest{
           
           if (this->M->get1Based(i,j) > this->L->get1Based(this->p).getV()) {    // index of L is 1-based
 
-            DEBUG_STDERR("builtInitKBest: (L1) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k)
+            DEBUG_STDERR("builtInitKBest: (L1) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
             sol = new Solution(*this->prob);
             sol->setV(this->M->get1Based(i,j));
             sol->setT(i);
             sol->setJ(j);
             if (!this->L->isIn(*sol) && !L1.isIn(*sol)){
-              DEBUG_STDERR("builtInitKBest: (L1) found solution "<<*sol<<"")
+              DEBUG_STDERR("builtInitKBest: (L1) found solution "<<*sol<<"");
               L1.addSolution(*sol);
               counter++;
             }else{
-              DEBUG_STDERR("builtInitKBest: (L1) duplicate solution "<<*sol<<"")
+              DEBUG_STDERR("builtInitKBest: (L1) duplicate solution "<<*sol<<"");
               delete sol;
             }
             if (counter==this->k){
@@ -240,7 +240,7 @@ namespace kbest{
     int zcum=0;
 
     //DEBUG_STDERR("backtracking: sol_index="<<sol_index<<", current_sol="<<current_sol)
-    DEBUG_STDERR("backtracking: current solution t="<<t<<", j="<<j<<", z="<<z<<", M[t,j]="<<this->M->get1Based(t, j))
+    DEBUG_STDERR("backtracking: current solution t="<<t<<", j="<<j<<", z="<<z<<", M[t,j]="<<this->M->get1Based(t, j));
       
 
     while (t>0){
@@ -248,7 +248,7 @@ namespace kbest{
       z-=this->prob->getC1Based(j);
       zcum+=this->prob->getC1Based(j);
       current_sol.incDecisionVar1Based(j);
-      DEBUG_STDERR("backtracking current_sol: j="<<j<<", current_sol.X="<<current_sol.getDecisionVars())
+      DEBUG_STDERR("backtracking current_sol: j="<<j<<", current_sol.X="<<current_sol.getDecisionVars());
       
       if ( z<=0 ) {
         break;
@@ -258,7 +258,7 @@ namespace kbest{
       for (int s=1; s < j+1; s++){
         if (this->M->get1Based(t,s)==z){
           j=s;
-          DEBUG_STDERR("backtracking sol: z="<<z<<" found at "<<j<<" in M["<<t<<",:"<<j<<"]=")
+          DEBUG_STDERR("backtracking sol: z="<<z<<" found at "<<j<<" in M["<<t<<",:"<<j<<"]=");
           break;
         }
       }
@@ -307,7 +307,7 @@ namespace kbest{
             vector<int> dvar2= current_sol->getDecisionVars();
             this->L->get1Based(g).setDecisionVars(dvar1 + dvar2);
             
-            DEBUG_STDERR("searchAltSol:  alternative sol!"<<endl<<"  current_sol="<<*current_sol<<endl<<"  L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<"  L[g="<<g<<"]="<<this->L->get1Based(g))
+            DEBUG_STDERR("searchAltSol:  alternative sol!"<<endl<<"  current_sol="<<*current_sol<<endl<<"  L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<"  L[g="<<g<<"]="<<this->L->get1Based(g));
 
             if (this->M->get1Based(t,s) >= this->L->get1Based(this->p).getV()) {
               // Determine position kk : kk>g to insert this alternative 
