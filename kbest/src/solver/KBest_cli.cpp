@@ -77,11 +77,13 @@ int main(int argc, char *argv[]){
   vector<string>::iterator i;
   vector<string>::iterator it;
 
-  vector<string> args= vector<string>(argc);
+  vector<string> args;
 
   for (int k=0;k<argc;k++){
     args.push_back(string(argv[k]));
   }
+  i=args.begin()+1;
+  it=args.begin()+1;
 
   if(cmdOptionExists(args.begin(), args.end(), "-h")){
     print_help();
@@ -112,13 +114,12 @@ int main(int argc, char *argv[]){
       i=it;
     }
   }
-
   KBestSolver kbs=KBestSolver();
   if (!sample_only){
     for (; i < args.end(); ++i){
       try{
-        string filename=*it;
-        Problem prob=Problem(filename);
+        string filename=*i;
+	    Problem prob=Problem(filename);
         SolutionList slist = kbs.kbest(prob, k);
         if (perf_only){
           print_performance_csv_row(prob, k, kbs.getLastForwardTime(), kbs.getLastBackwardTime());
