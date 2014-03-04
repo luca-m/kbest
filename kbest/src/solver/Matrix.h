@@ -24,8 +24,8 @@ namespace kbest{
       Matrix();
       /**
        * Create a matrix
-       * @param number of rows
-       * @param number of coloumns
+       * @param rows number of rows
+       * @param cols number of coloumns
        * */
       Matrix(int rows, int cols);
       /**
@@ -41,39 +41,39 @@ namespace kbest{
       int getNCols();
       /**
        * Retrieve an element using 0-based index
-       * @param row index
-       * @param col index
+       * @param r row index
+       * @param c col index
        * */
       int get(int r, int c);
       /**
        * Retrieve an element using 1-based index
-       * @param row index
-       * @param col index
+       * @param r row index
+       * @param c col index
        * */
       int get1Based(int r, int c);
       /**
        * Set an element using 0-based index
-       * @param Row index
-       * @param Coloumn index
-       * @param Value to set
+       * @param r Row index
+       * @param c Coloumn index
+       * @param value Value to set
        * */
       int set(int r, int c, int value);
       /**
        * Set an element using 1-based index
-       * @param Row index
-       * @param Coloumn index
-       * @param Value to set
+       * @param r Row index
+       * @param c Coloumn index
+       * @param value Value to set
        * */
       int set1Based(int r, int c, int value);
 
       /**
        * Retrieve a row using 0-based index
-       * @param row index 
+       * @param r Row index 
        * */ 
       std::vector<int> getRow(int r);
       /**
        * Retrieve a row using 1-based index
-       * @param row index 
+       * @param r Row index 
        * */ 
       std::vector<int> getRow1Based(int r);
 

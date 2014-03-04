@@ -25,7 +25,7 @@ namespace kbest{
     public:
       /**
       * Create an empty solution for the specified problem
-      * @param Problem
+      * @param problem Problem
       */
       Solution(kbest::Problem & problem);
       /**
@@ -34,7 +34,7 @@ namespace kbest{
 
       /**
       * Set the decision variables
-      * @param Vector containing new decision vars values
+      * @param dvars Vector containing new decision vars values
       */
       void setDecisionVars(std::vector<int> dvars);
       /**
@@ -42,24 +42,24 @@ namespace kbest{
       */
       std::vector<int> & getDecisionVars();
       /**
-      * 
-      * @param Vector containing the decision vars to add
+      * Add values to current decision variables
+      * @param dvars Vector containing the decision vars to add
       */
       void addDecisionVars(std::vector<int> dvars);
       /**
       * Increment a decision variable
-      * @param Index of the decision variable to increment
+      * @param j Index of the decision variable to increment
       */
       void incDecisionVar(int j);
       /**
       * Increment a decision variable
-      * @param Index of the decision variable to increment
+      * @param j Index of the decision variable to increment
       */
       void incDecisionVar1Based(int j);
 
       /**
       * Set Solution value
-      * @param Value
+      * @param v Value
       */
       void setV(int v);
       /**
@@ -68,7 +68,7 @@ namespace kbest{
       int getV();
       /**
       * Set Supernode J index
-      * @param index
+      * @param j Index
       */
       void setJ(int j);
       /**
@@ -77,7 +77,7 @@ namespace kbest{
       int getJ();
       /**
       * Set Supernode T index
-      * @param index
+      * @param t Index
       */
       void setT(int t);
       /**
@@ -86,7 +86,7 @@ namespace kbest{
       int getT();
       /**
       * Set Check
-      * @param Value
+      * @param c is Checked
       */
       void setC(bool c);
       /**
@@ -122,7 +122,7 @@ namespace kbest{
       SolutionList();
       /**
       * Create an empty Solution list reserving space for further elements
-      * @param Estimated number of elements that will be inserted in the list
+      * @param estimatedElements Estimated number of elements that will be inserted in the list
       */
       SolutionList(int estimatedElements);
       /**
@@ -141,7 +141,7 @@ namespace kbest{
       void sortNonIncreasing(int begin, int end);
       /**
       * Retrieve a Solution
-      * @param index of the solution to retrieve
+      * @param i index of the solution to retrieve
       */
       Solution & get(int i);
       /**
@@ -150,50 +150,50 @@ namespace kbest{
       Solution & getLast();      
       /**
       * Retrieve a Solution
-      * @param index of the solution to retrieve
+      * @param i index of the solution to retrieve
       */
       Solution & get1Based(int i);
       /**
-      * @param Solution to check
+      * @param sol Solution to check
       */
       bool isIn(Solution & sol);
       /**
-      * @param Solution to add
+      * @param sol Solution to add
       */
       void addSolution(Solution & sol);
       /**
-      *
-      * @param Solution to insert
+      * Insert a solution assuming current SolutionList sorted
+      * @param sol Solution to insert
       */
       void insertSorted(Solution & sol);
       /**
       * Insert a Solution at specified index
-      * @param Insertion index
-      * @param Solution to insert
+      * @param i Insertion index
+      * @param sol Solution to insert
       */
       void insertAt(int i, Solution & sol);
       /**
       * Insert a Solution at specified index
-      * @param Insertion index
-      * @param Solution to insert
+      * @param i Insertion index
+      * @param sol Solution to insert
       */
       void insertAt1Based(int i, Solution &sol);
       /**
       * Find the insertion index considering the current SolutionList sorted. 
-      * @param Solution to insert
-      * @param Start search insertion index from specified position
+      * @param sol Solution to insert
+      * @param startFrom Start search insertion index from specified position
       */
       int getInsertionIndex(Solution & sol, int startFrom);
       /**
       * Find the insertion index considering the current SolutionList sorted. 
-      * @param Solution to insert
-      * @param Start search insertion index from specified position
+      * @param sol Solution to insert
+      * @param startFrom Start search insertion index from specified position
       */
       int getInsertionIndex1Based(Solution & sol, int startFrom);
       /**
       * Merge two sorted SolutionLists, keep first values of the lists 
-      * @param Solution List to merge
-      * @param Maximum number of element to merge
+      * @param solList Solution List to merge
+      * @param maxElements Maximum number of element to merge
       */
       void merge(SolutionList & solList, int maxElements);
       /**

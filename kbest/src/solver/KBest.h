@@ -36,8 +36,8 @@ namespace kbest{
       ~KBestSolver();
       /**
       *
-      * @param Problem to solve
-      * @param number of best solution to find 
+      * @param prob Problem to solve
+      * @param k Number of best solution to find 
       */
       SolutionList & kbest(Problem & prob, int k);
       /**
@@ -78,19 +78,19 @@ namespace kbest{
       /**
       * Backtrack a solution for recovering associated decision variables and eventually
       * search for alternative solution.
-      * @param Solution to consider
-      * @param Index of the considered Solution in SolutionList
-      * @param Check for alternative solution if needed
+      * @param current_sol Solution to consider
+      * @param sol_index Index of the considered Solution in SolutionList
+      * @param alternative Check for alternative solution if needed
       */
       void backtracking(Solution & current_sol, int sol_index, bool alternative);
       /**
       * Search for alternative solution starting from a particular node in the 
       * matrix representation of the problem.
-      * @param Supernode index
-      * @param Node index
-      * @param Solution value accumulator
-      * @param Previous node index
-      * @param Minimum Solution index in SolutionList where to insert new Solutions 
+      * @param t Supernode T index
+      * @param j Node J index
+      * @param zcum Solution value accumulator
+      * @param j1 Previous node index
+      * @param sol_index Minimum Solution index in SolutionList where to insert new Solutions 
       */
       void searchAltSol(int t, int j, int zcum, int j1, int sol_index);
 

@@ -37,13 +37,13 @@ namespace kbest{
       /**
        * Create a new void problem
        *
-       * @param Number of variables in the problem
-       * @param Problem capacity
+       * @param nvar Number of variables in the problem
+       * @param b Problem capacity
        * */
       Problem(int nvar, int b);
       /**
        * Create a new problem parsing a problem file
-       * @param Problem file path
+       * @param filePath Problem file path
        * */
       Problem(std::string filePath);
       /**
@@ -52,36 +52,36 @@ namespace kbest{
 
       /**
        * Set a variable of the problem using 0-based index
-       * @param Index
-       * @param Cost associated to the variable
-       * @param Weight of the variable
+       * @param i Index
+       * @param cost Cost associated to the variable
+       * @param weight Weight of the variable
        * */
       void setVariable(int i, int cost, int weight);
       /** 
        * Set a variable of the problem using 1-based index
-       * @param Index
-       * @param Cost associated to the variable
-       * @param Weight of the variable
+       * @param i Index
+       * @param cost Cost associated to the variable
+       * @param weight Weight of the variable
        */
       void setVariable1Based(int i, int cost, int weight);
       /**
        * Get cost of i-th var using 0-based index
-       * @param index
+       * @param i Index
        * */
       int getC(int i);
       /**
        * Get cost of i-th var using 1-based index
-       * @param Index
+       * @param i Index
        * */
       int getC1Based(int i);
       /**
        * Get weight of i-th var using 0-based index
-       * @param Index
+       * @param i Index
        * */
       int getA(int i);
       /**
        * Get weight of i-th var using 1-based index
-       * @param Index
+       * @param i Index
        * */
       int getA1Based(int i);
       /**
@@ -94,7 +94,7 @@ namespace kbest{
       int getCapacity();
       /**
        * Set the capacity associated to the problem
-       * @param Capacity associated to the Knapsack problem
+       * @param capacity Capacity associated to the Knapsack problem
        * */
       int setCapacity(int capacity);
       /**
