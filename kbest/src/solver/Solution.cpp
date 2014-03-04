@@ -47,31 +47,24 @@ namespace kbest{
     //}
     //return dvars;
   }
-    /**
-    *
-    */
-    void Solution::addDecisionVars(std::vector<int> dvars){
-      cerr<<"ERR: addDecisionVars not yet implemented!"<<endl;
-      throw 99;
-    }
-    /**
-    *
-    */
-    void Solution::incDecisionVar(int j){
-     if ( j >= 0 && j < this->X.size()){
-        this->X.at(j)++;
-      } else {
-        cerr<<"ERR: Cannot inc decision vars, out of range (j="<<j<<",nvars="<<this->X.size()<<")!!"<<endl;
-        throw 50;
-      }
-    }
-    /**
-    *
-    */
-    void Solution::incDecisionVar1Based(int j){
-      this->incDecisionVar(j-1);
-    }
 
+  void Solution::addDecisionVars(std::vector<int> dvars){
+    cerr<<"ERR: addDecisionVars not yet implemented!"<<endl;
+    throw 99;
+  }
+
+  void Solution::incDecisionVar(int j){
+   if ( j >= 0 && j < this->X.size()){
+      this->X.at(j)++;
+    } else {
+      cerr<<"ERR: Cannot inc decision vars, out of range (j="<<j<<",nvars="<<this->X.size()<<")!!"<<endl;
+      throw 50;
+    }
+  }
+
+  void Solution::incDecisionVar1Based(int j){
+    this->incDecisionVar(j-1);
+  }
 
   void Solution::setV(int v){this->V=v;}
   
@@ -91,12 +84,12 @@ namespace kbest{
 
 
   SolutionList::SolutionList(){
-    this->slist = new std::vector<Solution>();
+    this->slist = new std::vector<Solution*>();
     this->slist->reserve(100);
   }
 
   SolutionList::SolutionList(int estimatedElements){
-    this->slist = new std::vector<Solution>();
+    this->slist = new std::vector<Solution*>();
     this->slist->reserve(estimatedElements);
   }
 
@@ -109,18 +102,18 @@ namespace kbest{
   }
 
   void SolutionList::sortNonIncreasing(){
-    std::sort(this->slist->begin(), this->slist->end());
+    std::sort(this->slist->begin(), this->slist->end(), comparePtrToSolution );
     std::reverse(this->slist->begin(), this->slist->end());
   }
 
   void SolutionList::sortNonIncreasing(int begin, int end){
-    std::sort(this->slist->begin()+begin, this->slist->begin()+end);
+    std::sort(this->slist->begin()+begin, this->slist->begin()+end, comparePtrToSolution);
     std::reverse(this->slist->begin()+begin, this->slist->begin()+end);
   }
 
   Solution & SolutionList::get(int i){
     if (i>=0 && i<this->slist->size()){
-      return this->slist->at(i);
+      return *this->slist->at(i);
     } else {
       cerr<<"ERR: variable index out of valid range: i="<<i<<endl;
       throw 10;
@@ -140,7 +133,13 @@ namespace kbest{
       cerr<<"ERR: solution list is NULL !"<<endl;
       throw 40;
     }
-    return std::find( this->slist->begin(), this->slist->end(), sol) != this->slist->end();
+    for (unsigned int i=0; i< this->slist->size(); i++){
+      if (sol == *this->slist->at(i)){
+        return true;
+      }
+    }
+    return false;
+    //return std::find( this->slist->begin(), this->slist->end(), &sol) != this->slist->end();
   }
 
   void SolutionList::addSolution(Solution & sol){
@@ -148,7 +147,7 @@ namespace kbest{
       cerr<<"ERR: solution list is NULL !"<<endl;
       throw 40;
     }
-    this->slist->push_back(sol);
+    this->slist->push_back(&sol);
   }
 
   void SolutionList::insertSorted(Solution & sol){
@@ -161,9 +160,9 @@ namespace kbest{
       throw 40;
     }
     DEBUG_STDERR("SolutionList insert at i="<<i<<" of "<<this->slist->size())
-    std::vector<Solution>::iterator it;
+    std::vector<Solution*>::iterator it;
     it = this->slist->begin() + i;
-    it = this->slist->insert(it, sol);
+    it = this->slist->insert(it, &sol);
   }
 
   void SolutionList::insertAt1Based(int i, Solution & sol){
@@ -186,7 +185,7 @@ namespace kbest{
     
     while (lo < hi) {
         mid=(lo+hi)/2;
-        if (sol.getV() > this->slist->at(mid).getV()) { 
+        if (sol.getV() > this->slist->at(mid)->getV()) { 
           hi=mid;
         } else {
           lo=mid+1; 
@@ -230,37 +229,39 @@ namespace kbest{
     return this->slist->size();
   }
 
-
+  bool comparePtrToSolution(Solution* sol0, Solution* sol){
+    return sol0->V < sol->V;
+  }
 
   bool operator < (const Solution & sol0, const Solution & sol){
-      return sol0.V < sol.V;
+    return sol0.V < sol.V;
   }
 
   bool operator == (const Solution & sol0, const Solution sol){
-      return sol0.V==sol.V && sol0.J==sol.J && sol0.T==sol.T;
+    return sol0.V==sol.V && sol0.J==sol.J && sol0.T==sol.T;
   }
 
   ostream & operator <<(ostream & os, Solution & sol){
-      os<<"{ V="<<sol.getV()<<", J="<<sol.getJ()<<", T="<<sol.getT()<<", C="<<sol.getC()<<", X=[ ";
-      for (int i=0; i < sol.X.size();i++){
-        if( sol.X.at(i)>0 ){
-          os<<"x"<<i+1<<"="<<sol.X.at(i)<<", ";
-        }
+    os<<"{ V="<<sol.getV()<<", J="<<sol.getJ()<<", T="<<sol.getT()<<", C="<<sol.getC()<<", X=[ ";
+    for (int i=0; i < sol.X.size();i++){
+      if( sol.X.at(i)>0 ){
+        os<<"x"<<i+1<<"="<<sol.X.at(i)<<", ";
       }
-      os<<"]}";
-      return os;
+    }
+    os<<"]}";
+    return os;
   }
 
   ostream & operator << (ostream & os, SolutionList & sl){
-      os<<"[ ";
-      for (int i=0; i<sl.size(); i++){
-        os<<sl.get(i);
-        if (i<sl.size()-1){
-          os<<", "<<endl;
-        }
+    os<<"[ ";
+    for (int i=0; i<sl.size(); i++){
+      os<<sl.get(i);
+      if (i<sl.size()-1){
+        os<<", "<<endl;
       }
-      os<<" ]";
-     return os;
+    }
+    os<<" ]";
+   return os;
   }
 
   std::vector<int> operator + ( std::vector<int> & v1, std::vector<int> & v2 ){  

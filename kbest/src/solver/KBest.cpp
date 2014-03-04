@@ -59,16 +59,17 @@ namespace kbest{
 
     this->fwd_start = getRealTime();  //clock();
     this->forward();
+    this->builtInitKBest();
     this->fwd_end = getRealTime();    //clock();
     DEBUG_STDERR("kbest: matrix after forward:"<<endl<<*this->M);
-
+    DEBUG_STDERR("kbest: initial solution found"<<endl<<*this->L);
     this->bwd_start = getRealTime();  //clock();
-    this->backward();
+    this->recoverSol();
     this->bwd_end = getRealTime();    //clock();
 
     delete this->M;
 
-    if ( this->L == NULL){
+    if (this->L == NULL){
       cerr<<"ERR: Solution list is still NULL after kbest calculation"<<endl;
       throw 40;
     }
@@ -111,15 +112,9 @@ namespace kbest{
     return;
   }
 
-  void KBestSolver::backward(){
-    this->builtInitKBest();
-    DEBUG_STDERR("backward: initial solution found"<<endl<<*this->L);
-    this->recoverSol();
-  }
-
   void KBestSolver::builtInitKBest(){
-    Solution * sol;
-    Solution * sol1;
+    Solution * sol = NULL;
+    //Solution * sol1 = NULL;
     int counter=0;
     int i=this->prob->getCapacity()+1;
     int j=0;
@@ -136,19 +131,20 @@ namespace kbest{
         j--;                      // j is 1-based
 
         if (this->M->get1Based(i,j) >= 0){
-
-          DEBUG_STDERR("builtInitKBest: (L) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
+          //DEBUG_STDERR("builtInitKBest: (L) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
           sol = new Solution(*this->prob);
           sol->setV(this->M->get1Based(i,j));
           sol->setT(i);
           sol->setJ(j);
           if (!this->L->isIn(*sol)) {
             DEBUG_STDERR("builtInitKBest: (L) found solution "<<*sol<<"");
-            counter++;
             this->L->addSolution(*sol);
+            counter++;
+            sol=NULL;
           }else{
             DEBUG_STDERR("builtInitKBest: (L) found duplicate solution "<<*sol<<"");
             delete sol;
+            sol=NULL;
           }
 
           if (counter==this->k){
@@ -162,9 +158,7 @@ namespace kbest{
     }
 
     this->p=counter;
-    //DEBUG_STDERR("builtInitKBest: L:\n"<<*this->L<<"")
     this->L->sortNonIncreasing();
-    //DEBUG_STDERR("builtInitKBest: sorted L:\n"<<*this->L<<"")
 
     if (this->p==this->k && (i1>this->prob->getA(0) || j1>1)){
       fim=true;
@@ -185,8 +179,7 @@ namespace kbest{
           j--;                        // j is 1-based
           
           if (this->M->get1Based(i,j) > this->L->get1Based(this->p).getV()) {    // index of L is 1-based
-
-            DEBUG_STDERR("builtInitKBest: (L1) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
+            //DEBUG_STDERR("builtInitKBest: (L1) i="<<i<<", j="<<j<<", counter="<<counter<<", k="<<this->k);
             sol = new Solution(*this->prob);
             sol->setV(this->M->get1Based(i,j));
             sol->setT(i);
@@ -195,9 +188,11 @@ namespace kbest{
               DEBUG_STDERR("builtInitKBest: (L1) found solution "<<*sol<<"");
               L1.addSolution(*sol);
               counter++;
+              sol=NULL;
             }else{
               DEBUG_STDERR("builtInitKBest: (L1) duplicate solution "<<*sol<<"");
               delete sol;
+              sol=NULL;
             }
             if (counter==this->k){
               i1=i; j1=j;
@@ -208,9 +203,7 @@ namespace kbest{
         }
       }
       p1=counter;
-      //DEBUG_STDERR("builtInitKBest: L1:\n"<<L1)
       L1.sortNonIncreasing();
-      //DEBUG_STDERR("builtInitKBest: sorted L1:\n"<<L1)
       
       if (L1.size()>0 && L1.get1Based(1).getV() > this->L->get1Based(this->k).getV()){
         this->L->merge(L1, this->k);
@@ -218,7 +211,7 @@ namespace kbest{
           fim=true;
         }
       }
-      L1.~SolutionList();
+      //L1.~SolutionList();
     }
   }
 
@@ -227,6 +220,7 @@ namespace kbest{
     while (i < this->p){
       i++;
       if (!this->L->get1Based(i).getC()) {
+        DEBUG_STDERR("recoverSol: start backtracking from  sol_index="<<i<<", current_sol="<<this->L->get1Based(i));
         this->backtracking(this->L->get1Based(i), i, true);
       }
     }
@@ -238,17 +232,14 @@ namespace kbest{
     int j1=j;
     int z=current_sol.getV();
     int zcum=0;
-
-    //DEBUG_STDERR("backtracking: sol_index="<<sol_index<<", current_sol="<<current_sol)
-    DEBUG_STDERR("backtracking: current solution t="<<t<<", j="<<j<<", z="<<z<<", M[t,j]="<<this->M->get1Based(t, j));
-      
-
+    DEBUG_STDERR("backtracking: start backtracking from  sol_index="<<sol_index<<", current_sol="<<current_sol);
+    
     while (t>0){
       t-=this->prob->getA1Based(j);
       z-=this->prob->getC1Based(j);
       zcum+=this->prob->getC1Based(j);
       current_sol.incDecisionVar1Based(j);
-      DEBUG_STDERR("backtracking current_sol: j="<<j<<", current_sol.X="<<current_sol.getDecisionVars());
+      //DEBUG_STDERR("backtracking current_sol: j="<<j<<", current_sol.X="<<current_sol.getDecisionVars());
       
       if ( z<=0 ) {
         break;
@@ -258,22 +249,23 @@ namespace kbest{
       for (int s=1; s < j+1; s++){
         if (this->M->get1Based(t,s)==z){
           j=s;
-          DEBUG_STDERR("backtracking sol: z="<<z<<" found at "<<j<<" in M["<<t<<",:"<<j<<"]=");
           break;
         }
       }
-      
+      //j1=current_sol.getJ();
       if (t>0 && alternative){
+        DEBUG_STDERR("backtracking: searching alt solutions using t="<<t<<", j="<<j<<", zcum="<<zcum<<", j1"<<j1<<", sol_index="<<sol_index);
         this->searchAltSol(t, j, zcum, j1, sol_index);
       }
       j1=j;
     }
     current_sol.setC(true);
+    DEBUG_STDERR("backtracking: end backtracking of sol_index="<<sol_index<<", current_sol="<<current_sol);
   }
 
   void KBestSolver::searchAltSol(int t, int j, int zcum, int j1, int sol_index){
-    Solution * alt_sol;
-    Solution * current_sol;
+    Solution * alt_sol = NULL;
+    Solution * current_sol = NULL;
     // t, j j1 are 1-based
     for (int s=1; s < j1+1; s++){
       if (s!=j){
@@ -285,11 +277,9 @@ namespace kbest{
             alt_sol->setV(this->M->get1Based(t,s)+zcum);
             alt_sol->setT(t);
             alt_sol->setJ(s);
-
             int g=this->L->getInsertionIndex1Based(*alt_sol, sol_index);     // old: findInsertionIndex(this->L, alt_sol, startfrom=sol_index)
+            DEBUG_STDERR("searchAltSol: inserting alt_sol "<<*alt_sol<<" at index="<<g);
             this->L->insertAt1Based(g, *alt_sol);    // alternative solution is in pos g, now compute its value.
-
-            //DEBUG_STDERR("searchAltSol: g="<<g<<", alt_sol="<<*alt_sol)
 
             if (this->p < this->k){
               this->p++;
@@ -300,6 +290,7 @@ namespace kbest{
             current_sol->setJ(s);
             current_sol->setT(t);
 
+            DEBUG_STDERR("searchAltSol: start backtring from index="<<g<<", sol="<<*current_sol);
             this->backtracking(*current_sol, g, false);
 
             this->L->get1Based(g).setC(true);
@@ -307,7 +298,11 @@ namespace kbest{
             vector<int> dvar2= current_sol->getDecisionVars();
             this->L->get1Based(g).setDecisionVars(dvar1 + dvar2);
             
-            DEBUG_STDERR("searchAltSol:  alternative sol!"<<endl<<"  current_sol="<<*current_sol<<endl<<"  L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<"  L[g="<<g<<"]="<<this->L->get1Based(g));
+            DEBUG_STDERR("searchAltSol:  alternative solution"<<endl<<
+                         "               current_sol="<<*current_sol<<endl<<
+                         "               L[sol_index="<<sol_index<<"]="<<this->L->get1Based(sol_index)<<endl<<
+                         "               L[g="<<g<<"]="<<this->L->get1Based(g)<<endl<<
+                         "               alt_sol="<<*alt_sol);
 
             if (this->M->get1Based(t,s) >= this->L->get1Based(this->p).getV()) {
               // Determine position kk : kk>g to insert this alternative 
@@ -316,6 +311,7 @@ namespace kbest{
               if (this->p < this->k){
                 this->p++;
               }
+              DEBUG_STDERR("searchAltSol: inserting current_sol="<<*current_sol<<" at index="<<kk);
               this->L->insertAt1Based(kk, *current_sol);
             }
           }

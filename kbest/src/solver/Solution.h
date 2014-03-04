@@ -203,10 +203,11 @@ namespace kbest{
 
     private:
       /// Solution Vector
-      std::vector<Solution> * slist;
+      std::vector<Solution *> * slist;
 
   };
 
+  bool comparePtrToSolution(Solution* a, Solution* b);
   /**
   * Less operator. This make Solution sortable.
   */

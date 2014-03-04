@@ -62,10 +62,6 @@ namespace kbest{
       */
       void forward();
       /**
-      * Perform the backward enumeration of best solutions
-      */
-      void backward();
-      /**
       * Recover initial solution from matrix representation of the problem,
       * It will populate the SolutionList associated with this instance of the solver. 
       */
