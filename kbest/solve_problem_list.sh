@@ -56,9 +56,9 @@ solve_problem_list_cpp() {
 	K_BEG=$1
 	K_INC=$2
 	K_END=$3
-	listp="$4"
-	outp="$5"
-	touch $outp 2>/dev/null
+	listp=$4
+	outp=$5
+	touch "$outp" 2>/dev/null
 	echo "# nvar, b, k, forward_time, backward_time, total_time" > "$outp"
 	for k in `seq $K_BEG $K_INC $K_END`;
 	do
@@ -78,6 +78,9 @@ if [ $# -ne 2 ]; then
   exit -1
 fi
 
+PROBLEMDIR=$(realpath $1)
+OUTDIR=$(realpath $2)
+
 trap control_c SIGINT
 
 MAXTHREAD=$(bc -i < <(echo "$(getCpuNum) / 2") | tail -1)		# 50% CPU usage
@@ -88,16 +91,15 @@ K_BEGIN=10
 K_INCREMENT=100
 K_END=1100
 
-OUT_DIR=$(realpath $2)
-PROBLEM_DIR=$(realpath $1)
-TOTAL=$(ls -1 "$PROBLEM_DIR" | grep '.lst$' | wc -l)
+TOTAL=$(ls -1 "$PROBLEMDIR" | grep '.lst$' | wc -l)
 
-for plist in $(ls -1 "$PROBLEM_DIR" | grep '.lst$' );
+for plist in $(ls -1 "$PROBLEMDIR" | grep '.lst$' );
 do
 	echoerr "INFO: Processing problem list $INDEX/$TOTAL"
-	plist_path="$PROBLEM_DIR/$plist"
-	out_path="$OUT_DIR/$plist.solved"
-	solve_problem_list_python "$K_BEGIN" "$K_INCREMENT" "$K_END" "$plist_path" "$out_path" &
+	plist_path="$PROBLEMDIR/$plist"
+	out_path="$OUTDIR/$plist.solved"
+	#solve_problem_list_python "$K_BEGIN" "$K_INCREMENT" "$K_END" "$plist_path" "$out_path" &
+	solve_problem_list_cpp "$K_BEGIN" "$K_INCREMENT" "$K_END" "$plist_path" "$out_path" &
 	PIDS+=($!)
 	((INDEX++))
 	((NPROC++))
