@@ -34,15 +34,15 @@ namespace kbest{
     this->bwd_end=0;
   }
 
-  float KBestSolver::getLastForwardTime(){
-    return ((float)(fwd_end-fwd_start))/CLOCKS_PER_SEC;
+  double KBestSolver::getLastForwardTime(){
+    return ((double)(fwd_end-fwd_start));///CLOCKS_PER_SEC;
   }
 
-  float KBestSolver::getLastBackwardTime(){
-    return ((float)(bwd_end-bwd_start))/CLOCKS_PER_SEC;
+  double KBestSolver::getLastBackwardTime(){
+    return ((double)(bwd_end-bwd_start));///CLOCKS_PER_SEC;
   }
 
-  float KBestSolver::getLastTotalTime(){
+  double KBestSolver::getLastTotalTime(){
     return this->getLastForwardTime()+this->getLastBackwardTime();
   }
 
@@ -57,15 +57,14 @@ namespace kbest{
       throw 40;
     }
 
-    this->fwd_start = clock();
+    this->fwd_start = getRealTime();  //clock();
     this->forward();
-    this->fwd_end = clock();
-
+    this->fwd_end = getRealTime();    //clock();
     DEBUG_STDERR("kbest: matrix after forward:"<<endl<<*this->M)
 
-    this->bwd_start = clock();
+    this->bwd_start = getRealTime();  //clock();
     this->backward();
-    this->bwd_end = clock();
+    this->bwd_end = getRealTime();    //clock();
 
     delete this->M;
 

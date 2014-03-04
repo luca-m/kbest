@@ -1,5 +1,6 @@
 
 add_executable(kbest_cli KBest_cli.cpp  
+                          Time.cpp Time.h
                           KBest.cpp  KBest.h  
                           Matrix.cpp  Matrix.h  
                           Problem.cpp  Problem.h  

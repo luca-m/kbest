@@ -30,7 +30,7 @@ void print_help(){
   " \n"
   " Usage:\n"
   " \n"
-  "    ./kbest [-h] [-p] [--sample] [-k NUM] PROBLEMFILE + \n"
+  "    ./kbest_cli [-h] [-p] [--sample] [-k NUM] [PROB [PROB ...]]\n"
   " \n"
   " Options:"
   "\n"
@@ -41,7 +41,7 @@ void print_help(){
   " \n"
   " Params:\n"
   " \n"
-  "       PROBLEMFILE+  File where to load a 1-D knapsack problem\n";
+  "       PROB      File where to load a 1-D knapsack problem\n";
   cout<<help;
 }
 
@@ -52,8 +52,9 @@ void print_solutions(SolutionList & slist, int k){
   }
 }
 
-void print_performance_csv_row(Problem & prob, int k, float forward_time, float backward_time ){
+void print_performance_csv_row(Problem & prob, int k, double forward_time, double backward_time ){
   //  nvar, b, k, forward_time, backward_time, total_time
+  cout.precision(5);
   cout<<prob.getNVar()<<","<<prob.getCapacity()<<","<<k<<","<<forward_time<<","<<backward_time<<","<<forward_time+backward_time<<endl;
 }
 
