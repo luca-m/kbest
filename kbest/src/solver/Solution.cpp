@@ -241,7 +241,13 @@ namespace kbest{
   }
 
   ostream & operator <<(ostream & os, Solution & sol){
-      os<<"{ V="<<sol.getV()<<", J="<<sol.getJ()<<", T="<<sol.getT()<<", C="<<sol.getC()<<", X="<<sol.getDecisionVars()<<" }";
+      os<<"{ V="<<sol.getV()<<", J="<<sol.getJ()<<", T="<<sol.getT()<<", C="<<sol.getC()<<", X=[ ";
+      for (int i=0; i < sol.X.size();i++){
+        if( sol.X.at(i)>0 ){
+          os<<"x"<<i+1<<"="<<sol.X.at(i)<<", ";
+        }
+      }
+      os<<"]}";
       return os;
   }
 
@@ -259,7 +265,7 @@ namespace kbest{
 
   std::vector<int> operator + ( std::vector<int> & v1, std::vector<int> & v2 ){  
     if (v1.size()!= v2.size()) {
-      cerr<<"Cannot sum two vecto of different size !"<<endl;
+      cerr<<"ERR: Cannot sum two vecto of different size!"<<endl;
       throw 40;
     }
     int sz=v1.size();

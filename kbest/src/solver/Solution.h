@@ -29,61 +29,68 @@ namespace kbest{
       */
       Solution(kbest::Problem & problem);
       /**
-      * 
       */
       ~Solution();
 
       /**
       * Set the decision variables
+      * @param Vector containing new decision vars values
       */
       void setDecisionVars(std::vector<int> dvars);
       /**
-      *
+      * Retrieve the decision variables
       */
       std::vector<int> & getDecisionVars();
       /**
-      *
+      * 
+      * @param Vector containing the decision vars to add
       */
       void addDecisionVars(std::vector<int> dvars);
       /**
-      *
+      * Increment a decision variable
+      * @param Index of the decision variable to increment
       */
       void incDecisionVar(int j);
       /**
-      *
+      * Increment a decision variable
+      * @param Index of the decision variable to increment
       */
       void incDecisionVar1Based(int j);
 
       /**
-      *
+      * Set Solution value
+      * @param Value
       */
       void setV(int v);
       /**
-      *
+      * Retrieve Solution value
       */
       int getV();
       /**
-      *
+      * Set Supernode J index
+      * @param index
       */
       void setJ(int j);
       /**
-      *
+      * Retrieve Supernode J index
       */
       int getJ();
       /**
-      *
+      * Set Supernode T index
+      * @param index
       */
       void setT(int t);
       /**
-      *
+      * Retrieve Supernode T index
       */
       int getT();
       /**
-      *
+      * Set Check
+      * @param Value
       */
       void setC(bool c);
       /**
-      *
+      * Retrieve Check
       */
       bool getC();
 
@@ -91,9 +98,9 @@ namespace kbest{
 
       /// Solution Value
       int V;
-      /// Supernode index
+      /// Supernode J index
       int J;
-      /// 
+      /// Supernode T index
       int T;
       /// Has been checked
       bool C;
