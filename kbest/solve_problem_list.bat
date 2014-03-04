@@ -21,7 +21,8 @@ for %%f in (%indir%\*.lst) do (
 		
 		for /F "tokens=*" %%A in (%%f) do (
 			:: Launch the solver 
-		  kbest.exe -p -k %%I %%A >> tempfile.temp
+			::echo -p -k %%I "%%A"
+		  	kbest_cli.exe -p -k %%I "%%A" >> tempfile.temp
 		)
 	)
 	move tempfile.temp "%outdir%\%listFile%.solved.csv"
