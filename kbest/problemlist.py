@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 '''
 @module Problem List Creator
+@author luca.mella@studio.unibo.it
+
+Parse a Problem Library generated with the "Galassi and Leardini" generator, then produce
+problem path lists (as text file).
+
+Support aggregation based on number of variables and based on the type of the instance. 
+
 '''
 import argparse
 from os import listdir
@@ -11,6 +18,9 @@ from re import match
 from collections import defaultdict
 
 class Instance(object):
+  '''
+  @class Simple Instance Class
+  '''
   def __init__(self, n=0,type='unknown', b=0, path='unknown'):
     self.varn=n
     self.type=type
@@ -29,6 +39,9 @@ class Instance(object):
     return h
 
 def find_instances(directory):
+  ''' 
+  Find instances of problems in the directories of the library.
+  '''
   print('Searching instances in folder {}'.format(directory))
   instances=list()
   types=defaultdict(lambda:list())
@@ -66,6 +79,9 @@ def find_instances(directory):
 
 
 def write_problem_lists(outdir, instances, types, varnum, type_varnum, byType=False, byNumber=False):
+  ''' 
+  Write problem lists in text files. (ugly)
+  '''
   print('Writing instances paths in folder {}'.format(outdir))
   if byType is False and byNumber is False:
     with open(join(outdir,'instances.lst'),'w') as f:
@@ -89,7 +105,7 @@ def write_problem_lists(outdir, instances, types, varnum, type_varnum, byType=Fa
 
 if __name__=='__main__':
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument('-d','--dir',help='Directory that contain a the problem library', default='.')
+  parser.add_argument('-d','--dir',help='Directory that contains a the problem library', default='.')
   parser.add_argument('-o','--outdir',help='Directory where to save problem lists', default='.')
   parser.add_argument('-n',help='Group problems by number of vars', action='store_true')
   parser.add_argument('-t',help='Group problems by instance type', action='store_true')
