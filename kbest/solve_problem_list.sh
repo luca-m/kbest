@@ -64,7 +64,7 @@ solve_problem_list_cpp() {
 	do
 	  while read prob;
 	  do
-	    ./kbest -p -k "$k" "$prob" >> "$outp"
+	    ./kbest_cli -p -k "$k" "$prob" >> "$outp"
 	  done < "$listp"
 	done
 }
@@ -84,7 +84,7 @@ MAXTHREAD=$(bc -i < <(echo "$(getCpuNum) / 2") | tail -1)		# 50% CPU usage
 INDEX=1
 NPROC=0
 PIDS=()
-K_BEGIN=10
+K_BEGIN=10 
 K_INCREMENT=100
 K_END=1100
 
