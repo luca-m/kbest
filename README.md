@@ -3,7 +3,7 @@ Knapsack K-Best
 
 _1-D Knapsack K-best solution porblem solver_
 
-Author: luca.mell@studio.unibo.it
+Author: luca.mella@studio.unibo.it
 
 Status: Experimental
 
