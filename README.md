@@ -48,18 +48,17 @@ Or also:
 ### Project Structure
 
 
-```text
-
-doc                             <-- documentation folder, doxigen class project report
-kbest                           <-- project folder, contains sources and other resources
-  |--> src                      <-- C++ generator and solver code
-  |--> kbest.py                 <-- Python solver (protorype)
-  |--> problemlist.py           <-- Problem converter, from "Galassi and Leardini" library to list of problems 
-  |--> solve_problem_list.sh    <-- Script for solving a problem list (Linux) 
-  |--> solve_problem_list.bat   <-- Script for solving a problem list (Windows)
-  |--> plots.R                  <-- Script for plotting computation times (Require R or RStudio)
-
-```
+    binaries                        <-- Contains compiled binaries
+    doc                             <-- Documentation folder, doxigen class project report
+      |--> report                   <-- Class project report
+      |--> doxygen                  <-- Code documentation
+    kbest                           <-- Project folder, contains sources
+      |--> src                      <-- C++ generator and solver code
+      |--> kbest.py                 <-- Python solver (protorype)
+      |--> problemlist.py           <-- Problem converter, from "Galassi and Leardini" library to list of problems 
+      |--> solve_problem_list.sh    <-- Script for solving a problem list (Linux) 
+      |--> solve_problem_list.bat   <-- Script for solving a problem list (Windows)
+      |--> plots.R                  <-- Script for plotting computation times (Require R or RStudio)
 
 ### Dependencies
 
