@@ -10,10 +10,11 @@
 \usepackage{xspace}
 \usepackage{hyperref}
 \usepackage{listings}
-
+\usepackage{amsmath}
+\usepackage{svg}
 \makeatletter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
-\usepackage{manifest}
+%\usepackage{manifest}
 
 \makeatother
 
@@ -26,17 +27,8 @@
  \ispdftrue
  \fi
 %%%%%%%
- \ifispdf
- \usepackage[pdftex]{graphicx}
- \else
- \usepackage{graphicx}
- \fi
-%%%%%%%%%%%%%%%
- \ifispdf
- \DeclareGraphicsExtensions{.pdf, .jpg, .tif,.png}
- \else
- \DeclareGraphicsExtensions{.eps, .jpg}
- \fi
+% \usepackage[pdftex]{graphicx}
+% \DeclareGraphicsExtensions{.pdf, .jpg, .tif,.png}
 %%%%%%%%%%%%%%%
 
 \newcommand{\action}[1]{\texttt{#1}\xspace}
@@ -118,21 +110,20 @@ Il progetto è stato articolato nelle seguenti macro-attività:
 \labelsec{algoritmo}
 
 Il problema della determinazione delle $K$ migliori soluzioni del problema di knapsack può essere espresso come: 
-\\
-\begin{subequation}
-  \begin{align}
-  \\
-  C_{1 \times n} \cdot X_{n \times 1} = z = \sum\limits_{i=1}^{n} c_i X_i \\ 
-  X_k , z_k \  with \  k \in 1 \dots K \  such \ that \\
-  X_1 , z_1 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{1} \) \\
-  X_2 , z_2 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{2} \) \ with \  X_2 \neq X_1 \\
-  X_3 , z_3 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{3} \) \ with \  X_3 \neq X_2,\  X_3 \neq X_1 \\
-  \cdots \\
-  X_K, z_K = max\( \sum\limits_{i=1}^{n} c_i x_{i}^{K} \) \ such that \  X_K \neq X_{j} \  with \  j \in 1..K-1 \\
-  \sum\limits_{i=1}^n a_ix_i \le b \\
-  b,x_i,a_i \in \mathbb{N}_0 \\
-  \end{align}
-\end{subequation} \\
+
+\begin{equation} 
+\begin{split}  
+ C_{1 \times n} \cdot X_{n \times{} 1} = & z = \sum_{i=1}^{n} c_i X_i  
+\\  X_k , z_k  \  with &  k \in 1 \dots K \  such \ that 
+\\  X_1 , z_1 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{1} \) 
+\\  X_2 , z_2 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{2} \) \  with \  X_2 \neq X_1 
+\\  X_3 , z_3 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{3} \) \  with \  X_3 \neq X_2, \  X_3 \neq X_1 
+\\ \cdots
+\\ X_K, z_K \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{K} \) \ such that \  X_K \neq X_{j} \  with \  j \in 1..K-1 
+\\ \sum_{i=1}^n a_ix_i \le b 
+\\ b, x_i,a_i \in \mathbb{N}_0 \end{split}
+\end{equation}
+
 
 Dove $K$ è il numero delle migliori soluzioni da determinare, $n$ è il numero degli oggetti considerati nel problema, $b$ è la capacità associata al knapsack, $x_i$ rappresentano le variabili decisionali associate agli oggetti del problema, $X_k$ il vettore di variabili decisionali associati alla $k$-esima soluzione, $a_i$ rappresentano i pesi, $c_i$ il profitto degli oggetti e $z_k$ il valore associato alla della $k$-esima soluzione determinata dal vettore di variabili decisionali $X_k$. 
 
@@ -160,29 +151,81 @@ Ad ogni passo compiuto all'indietro si cercano soluzioni alternative di profitto
 Tale soluzione però non è ancora di buona qualità in quanto è noto che partendo da quella stessa riga della matrice di supporto (ovvero da quello stesso peso) si possono raggiungere profitti migliori unendo alla nuova soluzione trovata quella dal quale si era partiti a cercare soluzioni alternative. 
 In altre parole si ottiene una soluzione di buona qualità aggiungendo alle variabili decisionali della soluzione alternativa le variabili decisionali ricostruite nella soluzione dalla quale si è cominciata la ricerca di ulteriori soluzioni.  
 
-Tale processo termina dopo che la ricostruzione delle variabili decisionali in ogni soluzione presente nella lista. 
-
-\section{Implementazioni}
-\labelsec{implementazioni}
+Tale processo termina dopo la ricostruzione delle variabili decisionali in ogni soluzione presente nella lista. 
 
 
-\subsection{Prestazioni}
-\labelssec{presntazioni}
+\section{Implementazione}
+\labelsec{implementazione}
 
+L'algoritmo è stato in prima istanza prototipato in \emph{Python} ed in seguito è stato implementato in \emph{C++} per ottenere migliori prestazioni.
+
+La compilazione della libreria e del tool a linea di comando avviene attraverso \emph{CMake}, dal quale è possibile generare soluzioni \emph{Visual Studio} o \emph{Makefile} linux. Per la documentazione del codice si è adottato \emph{Doxigen}. Il progetto completo è disponibile su \emph{GitHub} \url{https://github.com/luca-m/kbest}.
+
+\subsection{Risultati}
+\labelssec{risultati}
+
+Una veloce dimostrazione dell'algoritmo può essere ottenuta lanciando il tool a linea di comando con il parametro \emph{--sample} il quale risolverà il problema d'esempio riportato in \cite{YANASSE2000}, ulteriori dettagli sull'utilizzo del tool sono disponibili nel file ``README.md''.
+
+I tempi di computazione registrati sono stati ottenuti risolvendo $400$ instanze del KP con $K \in \{ 10,30,50,70,90,110,130,150 \}$, quindi $3200$\footnote{I successivi grafici riportano solo le istanze che che rientrano nel secondo e terzo quartile} istanze di KKP. Le istanze sono state generate utilizzando il generatore fornito da \emph{Galassi e Leardini}, basato sul lavoro pubblicato nell' articolo \cite{Pisinger94}. Sono state utilizzate istanze di vario tipo: ``Strongly Correlated'', ``Weakly Correlated'', ``Uncorrelated'', ``Bounded Strongly Correlated'' e ``Subset Sum''. 
+
+I grafici riportati in ~\ref{fig:time_by_b} riportano gli andamenti dei tempi di enumerazione in funzione della capacità, in ~\ref{fig:time_by_k_fw}~\ref{fig:time_by_k_bw} sono invece in funzione di $K$. Infine in \ref{fig:time_by_nbk_fw}~\ref{fig:time_by_nbk_bw} sono riportati gli andamenti dei tempi in funzione di numero di variabili $n$,capacità $b$ e parametro $K$. In questi ultimi è possibile notare come la ricerca forward sia sensibilmente influenzata dai $b$ e $n$, mentre la ricerca backward lo sia maggiormente rispetto al parametro $K$.
+
+\begin{figure}[!hb]
+  \centering
+
+  \begin{minipage}{0.35\linewidth} 
+  \raggedleft
+  \includegraphics[width=6.4cm]{img/graph_all-time_by_k_fw.pdf}
+  \caption{Tempo di enumerazione forward al variare di $K$}
+  \label{fig:time_by_k_fw}
+ \end{minipage}
+ \hspace{2.5cm}
+ \begin{minipage}{0.35\linewidth}
+  \raggedright  
+  \includegraphics[width=6.4cm]{img/graph_all-time_by_k_bw.pdf}
+  \caption{Tempo di enumerazione backward al variare di $K$}
+  \label{fig:time_by_k_bw}
+  \end{minipage}
+  
+\end{figure}
+
+\newpage
 
 \begin{figure}[!h]
   \centering
-  \includegraphics[width=12cm]{imgs/}
-  \caption{}
-  \label{fig:__}
+  \includegraphics[width=12cm]{img/graph_all-time_by_b.pdf}.
+  \caption{Tempi di soluzione con $K$ e numero di variabili fisso}
+  \label{fig:time_by_b}
 \end{figure}
 
-\appendix
+\newpage
 
-\section{Appendice}
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=12cm]{img/graph_all-time_by_nbk_bw.pdf}
+  \caption{Tempo di enumerazione backward al variare di $K$, $b$ e $n$}
+  \label{fig:time_by_nbk_bw}
+\end{figure}
+
+\newpage
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=12cm]{img/graph_all-time_by_nbk_fw.pdf}
+  \caption{Tempo di enumerazione forward al variare di $K$, $b$ e $n$}
+  \label{fig:time_by_nbk_fw}
+
+\end{figure}
 
 
+
+%\appendix
+%\section{Appendice}
+\newpage
+\bibliographystyle{plain}
+\bibliography{biblio}
 \end{document}
+
 
 
 
