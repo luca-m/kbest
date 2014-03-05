@@ -32,11 +32,12 @@ plot_time_by_K<-function(data, title){
   #     - data frame
   require(lattice)
   require(reshape)
-  data2=data.frame( k=as.factor(as.character(data$k)), 
+  data2=data.frame( k=as.numeric(data$k), 
                     forward_time=removeOutliers(data$forward_time), 
                     backward_time=removeOutliers(data$backward_time))
   data2=data2[complete.cases(data2),]
   dd=melt(data2, id.vars=c("k"))
+  dd$k<-as.factor(dd$k)
   trellis<-bwplot( k ~ value  | variable, data=dd ,
                     xlab="Elapsed time (sec)", 
                     ylab="k-best values recovered", 
@@ -84,11 +85,12 @@ plot_time_by_N<-function(data, title){
   #     - data frame
   require(lattice)
   require(reshape)
-  data2<-data.frame( n=as.factor(as.character(data$X..nvar)), 
+  data2<-data.frame( n=as.numeric(data$X..nvar), 
                     forward_time=removeOutliers(data$forward_time), 
                     backward_time=removeOutliers(data$backward_time))
   data2<-data2[complete.cases(data2),]
   dd<-melt(data2, id.vars=c("n"))
+  dd$n<-as.factor(dd$n)
   trellis<-bwplot( n ~ value  | variable, data=dd ,
                    xlab="Elapsed time (sec)", 
                    ylab="Number of variables", 
