@@ -1,0 +1,197 @@
+\documentclass{llncs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% package sillabazione italiana e uso lettere accentate
+\usepackage[utf8x]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{manifest}
+
+\makeatother
+
+%%%%%%%
+ \newif\ifispdf
+ \ifx\pdfoutput\undefined
+ \ispdffalse % we are not running PDFLaTeX
+ \else
+ \pdfoutput=1 % we are running PDFLaTeX
+ \ispdftrue
+ \fi
+%%%%%%%
+ \ifispdf
+ \usepackage[pdftex]{graphicx}
+ \else
+ \usepackage{graphicx}
+ \fi
+%%%%%%%%%%%%%%%
+ \ifispdf
+ \DeclareGraphicsExtensions{.pdf, .jpg, .tif,.png}
+ \else
+ \DeclareGraphicsExtensions{.eps, .jpg}
+ \fi
+%%%%%%%%%%%%%%%
+
+\newcommand{\action}[1]{\texttt{#1}\xspace}
+\newcommand{\code}[1]{{\small{\texttt{#1}}}\xspace}
+\newcommand{\codescript}[1]{{\scriptsize{\texttt{#1}}}\xspace}
+
+% Cross-referencing
+\newcommand{\labelsec}[1]{\label{sec:#1}}
+\newcommand{\xs}[1]{\sectionname~\ref{sec:#1}}
+\newcommand{\xsp}[1]{\sectionname~\ref{sec:#1} \onpagename~\pageref{sec:#1}}
+\newcommand{\labelssec}[1]{\label{ssec:#1}}
+\newcommand{\xss}[1]{\subsectionname~\ref{ssec:#1}}
+\newcommand{\xssp}[1]{\subsectionname~\ref{ssec:#1} \onpagename~\pageref{ssec:#1}}
+\newcommand{\labelsssec}[1]{\label{sssec:#1}}
+\newcommand{\xsss}[1]{\subsectionname~\ref{sssec:#1}}
+\newcommand{\xsssp}[1]{\subsectionname~\ref{sssec:#1} \onpagename~\pageref{sssec:#1}}
+\newcommand{\labelfig}[1]{\label{fig:#1}}
+\newcommand{\xf}[1]{\figurename~\ref{fig:#1}}
+\newcommand{\xfp}[1]{\figurename~\ref{fig:#1} \onpagename~\pageref{fig:#1}}
+\newcommand{\labeltab}[1]{\label{tab:#1}}
+\newcommand{\xt}[1]{\tablename~\ref{tab:#1}}
+\newcommand{\xtp}[1]{\tablename~\ref{tab:#1} \onpagename~\pageref{tab:#1}}
+
+% Category Names
+\newcommand{\sectionname}{Section}
+\newcommand{\subsectionname}{Subsection}
+\newcommand{\sectionsname}{Sections}
+\newcommand{\subsectionsname}{Subsections}
+\newcommand{\secname}{\sectionname}
+\newcommand{\ssecname}{\subsectionname}
+\newcommand{\secsname}{\sectionsname}
+\newcommand{\ssecsname}{\subsectionsname}
+\newcommand{\onpagename}{on page}
+
+\newcommand{\xauthA}{Luca Mella}
+\newcommand{\xauthB}{NameB StudentB}
+\newcommand{\xauthC}{NameC StudentC}
+\newcommand{\xfaculty}{II Faculty of Engineering}
+\newcommand{\xunibo}{Alma Mater Studiorum -- University of Bologna}
+\newcommand{\xaddrBO}{viale Risorgimento 2}
+\newcommand{\xaddrCE}{via Venezia 52}
+\newcommand{\xcityBO}{40136 Bologna, Italy}
+\newcommand{\xcityCE}{47521 Cesena, Italy}
+
+
+\begin{document}
+
+\title{Class Project Report\\Metodi e Modelli per il Supporto alle Decisioni\\A.A. 2012/2013}
+
+\author{\xauthA}
+
+\institute{
+\xunibo\\\xaddrCE, \xcityCE\\\email\ luca.mella@studio.unibo.it
+}
+
+\maketitle
+
+\lstset{frame=lrb,xleftmargin=\fboxsep , xrightmargin=-\fboxsep}
+
+%===========================================================================
+\section{Obiettivi}
+\labelsec{obiettivi}
+
+Lo scopo del progetto è l'implementazione dell'algoritmo proposto in \cite{YANASSE2000} per ottenere le $K$ migliori soluzioni di un problema di \emph{Knapsack} ad una dimensione. Tale problema è detto \emph{Knapsack K-Best Problem} (\emph{KPP}).
+
+\subsection{Piano di Lavoro}
+\labelssec{piano}
+
+Il progetto è stato articolato nelle seguenti macro-attività:
+
+  \begin{enumerate}
+    \item Prototipazione dell'algoritmo in \emph{Python}.
+    \item Supporto alla risoluzione di librerie di problemi generate con il generatore sviluppato da \emph{Galassi e Leardini}.
+    \item Implementazione dell'algoritmo in \emph{C++}.
+    \item Documentazione e visualizzazione dati.
+  \end{enumerate}
+
+\section{Algoritmo per KKP}
+\labelsec{algoritmo}
+
+Il problema della determinazione delle $K$ migliori soluzioni del problema di knapsack può essere espresso come: 
+\\
+\begin{subequation}
+  \begin{align}
+  \\
+  C_{1 \times n} \cdot X_{n \times 1} = z = \sum\limits_{i=1}^{n} c_i X_i \\ 
+  X_k , z_k \  with \  k \in 1 \dots K \  such \ that \\
+  X_1 , z_1 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{1} \) \\
+  X_2 , z_2 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{2} \) \ with \  X_2 \neq X_1 \\
+  X_3 , z_3 \mid max\( \sum\limits_{i=1}^{n} c_i x_{i}^{3} \) \ with \  X_3 \neq X_2,\  X_3 \neq X_1 \\
+  \cdots \\
+  X_K, z_K = max\( \sum\limits_{i=1}^{n} c_i x_{i}^{K} \) \ such that \  X_K \neq X_{j} \  with \  j \in 1..K-1 \\
+  \sum\limits_{i=1}^n a_ix_i \le b \\
+  b,x_i,a_i \in \mathbb{N}_0 \\
+  \end{align}
+\end{subequation} \\
+
+Dove $K$ è il numero delle migliori soluzioni da determinare, $n$ è il numero degli oggetti considerati nel problema, $b$ è la capacità associata al knapsack, $x_i$ rappresentano le variabili decisionali associate agli oggetti del problema, $X_k$ il vettore di variabili decisionali associati alla $k$-esima soluzione, $a_i$ rappresentano i pesi, $c_i$ il profitto degli oggetti e $z_k$ il valore associato alla della $k$-esima soluzione determinata dal vettore di variabili decisionali $X_k$. 
+
+L'algoritmo proposto in \cite{YANASSE2000} risolve il $KKP$ effettuando due distinti step enumerativi con complessità $O(Knb)$ nel tempo e $O(nb)$ in memoria in quanto viene utilizzata una come struttura dati di supporto 
+una matrice $M_{b \times n }$.
+
+\subsection{Enumerazione Forward}
+\labelssec{forward}
+
+Il primo step per la determinazione delle $K$ migliori soluzioni è popolare la matrice di supporto con i profitti $c_i$ associati alle variabili. La particolarità della matrice di supporto (\emph{ramification of supernodes}), ovvero la codifica dei pesi associati ad ogni elemento della matrice in una delle sue dimensioni, fa si di poter aggiornare i profitti consistentemente alle variabili in soluzione garantendo il rispetto dei vincoli di peso.
+
+La costruzione della matrice fa si che in ogni riga della matrice sono presenti al massimo le $n$ migliori aventi peso uguale al valore della riga stessa. Una volta popolata la matrice secondo l'algoritmo proposto in \cite{YANASSE2000} (\emph{build initial $K$ best}) è possibile determinare il valore della migliore soluzione e di altre $K-1$ soluzioni qualitativamente soddisfacenti.
+
+Tali soluzioni sono poste in una lista ed ordinate in base al loro profitto.
+
+\subsection{Enumerazione Backward}
+\labelssec{backward}
+
+L'enumerazione backward ha due principali scopi: ricostruire i valori delle variabili decisionali delle soluzioni ed esplorare soluzioni alternative.
+
+Nella parte di algoritmo denominata \emph{backtracking} si naviga all'indietro la matrice di supporto partendo da una qualsiasi soluzione. Sottraendo alla costo della soluzione il costo dell'ultima variabile che è stata inserita in tale soluzione si ottiene l'indice della nuova riga da dove si è calcolato il valore della soluzione in fase \emph{forward}. Durante questo processo vengono incrementati i valori delle variabili decisionali relative alle variabili inserite in soluzione ed inoltre viene mantenuta aggiornata una variabile accumulatore contenente la componente di profitto della soluzione attribuita alle celle che si è attraversato durante la navigazione backward.
+Questa componente di profitto ha un ruolo importante nella seconda fase dell'enumerazione backward, ovvero la \emph{ricerca di soluzioni alternative}.
+Ad ogni passo compiuto all'indietro si cercano soluzioni alternative di profitto maggiore all'interno della riga che si sta analizzando (\emph{search alternative solution}), una volta localizzata tale soluzione si procede ad una ulteriore fase di \emph{backtracking} per ricostruire i valori delle variabili decisionale. 
+
+Tale soluzione però non è ancora di buona qualità in quanto è noto che partendo da quella stessa riga della matrice di supporto (ovvero da quello stesso peso) si possono raggiungere profitti migliori unendo alla nuova soluzione trovata quella dal quale si era partiti a cercare soluzioni alternative. 
+In altre parole si ottiene una soluzione di buona qualità aggiungendo alle variabili decisionali della soluzione alternativa le variabili decisionali ricostruite nella soluzione dalla quale si è cominciata la ricerca di ulteriori soluzioni.  
+
+Tale processo termina dopo che la ricostruzione delle variabili decisionali in ogni soluzione presente nella lista. 
+
+\section{Implementazioni}
+\labelsec{implementazioni}
+
+
+\subsection{Prestazioni}
+\labelssec{presntazioni}
+
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=12cm]{imgs/}
+  \caption{}
+  \label{fig:__}
+\end{figure}
+
+\appendix
+
+\section{Appendice}
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
