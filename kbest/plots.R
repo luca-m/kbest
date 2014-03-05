@@ -13,6 +13,7 @@
 #
 
 removeOutliers<-function(x, na.rm=TRUE, ...) {
+  #return(x)
   qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
   H <- 1.5 * IQR(x, na.rm = na.rm)
   y <- x
@@ -38,12 +39,14 @@ plot_time_by_K<-function(data, title){
   data2=data2[complete.cases(data2),]
   dd=melt(data2, id.vars=c("k"))
   dd$k<-as.factor(dd$k)
+  dd$value<-as.numeric(dd$value)
+  
   trellis<-bwplot( k ~ value  | variable, data=dd ,
                     xlab="Elapsed time (sec)", 
                     ylab="k-best values recovered", 
                     main=title,
                    panel=function(x,y,...){
-                     #panel.xyplot(x,y, pch=4,col='gray')
+                     panel.xyplot(x,y, pch=4,col='gray')
                      panel.bwplot(x,y,...)
                      panel.grid(h=-length(dd),v=-1,col="gray")
                    })
@@ -67,7 +70,7 @@ plot_time_by_B<-function(data, title){
                    ylab="B Capacity", 
                    main=title,
                    panel=function(x,y,...){
-                     #panel.xyplot(x,y, pch=4,col='gray')
+                     panel.xyplot(x,y, pch=4,col='gray')
                      panel.bwplot(x,y,...)
                      panel.grid(h=-length(dd),v=-1,col="gray")
                      #print(x,y)
@@ -96,6 +99,7 @@ plot_time_by_N<-function(data, title){
                    ylab="Number of variables", 
                    main=title,
                    panel=function(x,y,...){
+                     panel.xyplot(x,y, pch=4,col='gray')
                      panel.bwplot(x,y,...)
                      panel.grid(h=-length(dd),v=-1,col="gray")
                    })
@@ -133,6 +137,13 @@ if (length(args) >= 1) {
   f<- paste(file,"-time_by_b",".svg",sep='')
   svg(f, width = width, height = height)
   tr <- plot_time_by_B(data[data$k==max(data$k) & data$X..nvar==max(data$X..nvar),],paste("Computation Time with K=",max(data$k),"and NVAR=",max(data$X..nvar)))
+  print(tr, newpage = TRUE)
+  dev.off()
+  
+  
+  f<- paste(file,"-time_by_b_all",".svg",sep='')
+  svg(f, width = 16.5, height = 23.4)
+  tr <- plot_time_by_B(data,paste("Computation Time for problem list:",basename(infile)))
   print(tr, newpage = TRUE)
   dev.off()
   
