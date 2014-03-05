@@ -14,14 +14,14 @@ set indir=%1
 set outdir=%2
 
 for %%f in (%indir%\*.lst) do (
-	echo Processing File %%f
+	echo Processing Problem list %%f
 	for %%C in ("%%f") do ( set listFile=%%~nxC )
 	echo # nvar, b, k, forward_time, backward_time, total_time > tempfile.temp
 	FOR %%I IN (50 100 250 500 1000 1500) DO (
 		
 		for /F "tokens=*" %%A in (%%f) do (
 			:: Launch the solver 
-			::echo -p -k %%I "%%A"
+			echo Solving Problem with K=%%I in "%%A"
 		  	kbest_cli.exe -p -k %%I "%%A" >> tempfile.temp
 		)
 	)
