@@ -64,6 +64,7 @@ solve_problem_list_cpp() {
 	do
 	  while read prob;
 	  do
+	  	echo "Processing: $prob" >&2
 	    ./kbest_cli -p -k "$k" "$prob" >> "$outp"
 	  done < "$listp"
 	done
@@ -84,12 +85,13 @@ OUTDIR=$(realpath $2)
 trap control_c SIGINT
 
 MAXTHREAD=$(bc -i < <(echo "$(getCpuNum) / 2") | tail -1)		# 50% CPU usage
+MAXTHREAD=1
 INDEX=1
 NPROC=0
 PIDS=()
 K_BEGIN=10 
-K_INCREMENT=100
-K_END=1100
+K_INCREMENT=20
+K_END=150
 
 TOTAL=$(ls -1 "$PROBLEMDIR" | grep '.lst$' | wc -l)
 
