@@ -92,7 +92,7 @@
 \section{Obiettivi}
 \labelsec{obiettivi}
 
-Lo scopo del progetto è l'implementazione dell'algoritmo proposto in \cite{YANASSE2000} per ottenere le $K$ migliori soluzioni di un problema di \emph{Knapsack} ad una dimensione. Tale problema è detto \emph{Knapsack K-Best Problem} (\emph{KPP}).
+Lo scopo del progetto è l'implementazione dell'algoritmo proposto in \cite{YANASSE2000} per ottenere le $K$ migliori soluzioni di un problema di \emph{Knapsack} ad una dimensione. Tale problema è detto \emph{Knapsack K-Best Problem} (\emph{KKP}).
 
 \subsection{Piano di Lavoro}
 \labelssec{piano}
@@ -114,7 +114,7 @@ Il problema della determinazione delle $K$ migliori soluzioni del problema di kn
 \begin{equation} 
 \begin{split}  
  C_{1 \times n} \cdot X_{n \times{} 1} = & z = \sum_{i=1}^{n} c_i X_i  
-\\  X_k , z_k  \  with &  k \in 1 \dots K \  such \ that 
+\\  X_k , z_k  \  with \  &  k \in 1 \dots K \  such \ that 
 \\  X_1 , z_1 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{1} \) 
 \\  X_2 , z_2 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{2} \) \  with \  X_2 \neq X_1 
 \\  X_3 , z_3 \mid & max \( \sum_{i=1}^{n} c_i x_{i}^{3} \) \  with \  X_3 \neq X_2, \  X_3 \neq X_1 
@@ -133,20 +133,20 @@ una matrice $M_{b \times n }$.
 \subsection{Enumerazione Forward}
 \labelssec{forward}
 
-Il primo step per la determinazione delle $K$ migliori soluzioni è popolare la matrice di supporto con i profitti $c_i$ associati alle variabili. La particolarità della matrice di supporto (\emph{ramification of supernodes}), ovvero la codifica dei pesi associati ad ogni elemento della matrice in una delle sue dimensioni, fa si di poter aggiornare i profitti consistentemente alle variabili in soluzione garantendo il rispetto dei vincoli di peso.
+Il primo step per la determinazione delle $K$ migliori soluzioni è popolare la matrice di supporto con i profitti $c_i$ associati alle variabili (\emph{ramification of supernodes}). La particolarità della matrice di supporto, ovvero la codifica dei pesi associati ad ogni elemento in una delle sue dimensioni, fa si di poter aggiornare i profitti consistentemente alle variabili in soluzione garantendo il rispetto dei vincoli di peso.
 
-La costruzione della matrice fa si che in ogni riga della matrice sono presenti al massimo le $n$ migliori aventi peso uguale al valore della riga stessa. Una volta popolata la matrice secondo l'algoritmo proposto in \cite{YANASSE2000} (\emph{build initial $K$ best}) è possibile determinare il valore della migliore soluzione e di altre $K-1$ soluzioni qualitativamente soddisfacenti.
+La matrice è costruita in mode che in ogni sua riga siano presenti al massimo le $n$ migliori soluzioni aventi peso uguale al valore dell'indice della riga stessa. Una volta popolata in accordo all'algoritmo proposto in \cite{YANASSE2000} (\emph{build initial $K$ best}) è possibile determinare il valore della migliore soluzione e di altre $K-1$ soluzioni qualitativamente soddisfacenti.
 
 Tali soluzioni sono poste in una lista ed ordinate in base al loro profitto.
 
-\subsection{Enumerazione Backward}
+\subsection{Enumerazione Backward} 
 \labelssec{backward}
 
-L'enumerazione backward ha due principali scopi: ricostruire i valori delle variabili decisionali delle soluzioni ed esplorare soluzioni alternative.
+L'enumerazione backward ha due principali scopi: ricostruire i valori delle variabili decisionali ed esplorare soluzioni alternative.
 
-Nella parte di algoritmo denominata \emph{backtracking} si naviga all'indietro la matrice di supporto partendo da una qualsiasi soluzione. Sottraendo alla costo della soluzione il costo dell'ultima variabile che è stata inserita in tale soluzione si ottiene l'indice della nuova riga da dove si è calcolato il valore della soluzione in fase \emph{forward}. Durante questo processo vengono incrementati i valori delle variabili decisionali relative alle variabili inserite in soluzione ed inoltre viene mantenuta aggiornata una variabile accumulatore contenente la componente di profitto della soluzione attribuita alle celle che si è attraversato durante la navigazione backward.
+Nella parte di algoritmo denominata \emph{backtracking} si naviga all'indietro la matrice di supporto partendo da una qualsiasi soluzione. Sottraendo al costo della soluzione il costo dell'ultima variabile che è stata inserita in tale soluzione si ottiene l'indice della nuova riga da dove si è calcolato il valore della soluzione in fase \emph{forward}. Durante questo processo vengono incrementati i valori delle variabili decisionali relative alle variabili inserite in soluzione, inoltre viene mantenuta aggiornata una variabile accumulatore che contiene la componente di profitto della soluzione attribuita alle celle che si è attraversato durante la navigazione backward.
 Questa componente di profitto ha un ruolo importante nella seconda fase dell'enumerazione backward, ovvero la \emph{ricerca di soluzioni alternative}.
-Ad ogni passo compiuto all'indietro si cercano soluzioni alternative di profitto maggiore all'interno della riga che si sta analizzando (\emph{search alternative solution}), una volta localizzata tale soluzione si procede ad una ulteriore fase di \emph{backtracking} per ricostruire i valori delle variabili decisionale. 
+Ad ogni passo compiuto all'indietro si cercano soluzioni alternative di profitto maggiore all'interno della riga che si sta analizzando (\emph{search alternative solution}), una volta localizzata tale soluzione si procede ad una ulteriore fase di \emph{backtracking} per ricostruire i valori delle variabili decisionali. 
 
 Tale soluzione però non è ancora di buona qualità in quanto è noto che partendo da quella stessa riga della matrice di supporto (ovvero da quello stesso peso) si possono raggiungere profitti migliori unendo alla nuova soluzione trovata quella dal quale si era partiti a cercare soluzioni alternative. 
 In altre parole si ottiene una soluzione di buona qualità aggiungendo alle variabili decisionali della soluzione alternativa le variabili decisionali ricostruite nella soluzione dalla quale si è cominciata la ricerca di ulteriori soluzioni.  
@@ -159,16 +159,16 @@ Tale processo termina dopo la ricostruzione delle variabili decisionali in ogni 
 
 L'algoritmo è stato in prima istanza prototipato in \emph{Python} ed in seguito è stato implementato in \emph{C++} per ottenere migliori prestazioni.
 
-La compilazione della libreria e del tool a linea di comando avviene attraverso \emph{CMake}, dal quale è possibile generare soluzioni \emph{Visual Studio} o \emph{Makefile} linux. Per la documentazione del codice si è adottato \emph{Doxigen}. Il progetto completo è disponibile su \emph{GitHub} \url{https://github.com/luca-m/kbest}.
+La compilazione della libreria e del tool a linea di comando avviene attraverso \emph{CMake}, dal quale è possibile generare soluzioni \emph{Visual Studio} o progetti \emph{Makefile} per Linux e Windows. Per la documentazione del codice si è adottato \emph{Doxygen}. Il progetto completo è disponibile su \emph{GitHub} \url{https://github.com/luca-m/kbest}.
 
 \subsection{Risultati}
 \labelssec{risultati}
 
 Una veloce dimostrazione dell'algoritmo può essere ottenuta lanciando il tool a linea di comando con il parametro \emph{--sample} il quale risolverà il problema d'esempio riportato in \cite{YANASSE2000}, ulteriori dettagli sull'utilizzo del tool sono disponibili nel file ``README.md''.
 
-I tempi di computazione registrati sono stati ottenuti risolvendo $400$ instanze del KP con $K \in \{ 10,30,50,70,90,110,130,150 \}$, quindi $3200$\footnote{I successivi grafici riportano solo le istanze che che rientrano nel secondo e terzo quartile} istanze di KKP. Le istanze sono state generate utilizzando il generatore fornito da \emph{Galassi e Leardini}, basato sul lavoro pubblicato nell' articolo \cite{Pisinger94}. Sono state utilizzate istanze di vario tipo: ``Strongly Correlated'', ``Weakly Correlated'', ``Uncorrelated'', ``Bounded Strongly Correlated'' e ``Subset Sum''. 
+I tempi di computazione registrati sono stati ottenuti risolvendo $400$ instanze del KP con $K \in \{ 10,30,50,70,90,110,130,150 \}$, quindi $3200$\footnote{I successivi grafici riportano solo le istanze che che rientrano nel secondo e terzo quartile} istanze del KKP. Le istanze sono state generate utilizzando il generatore fornito da \emph{Galassi e Leardini}, basato sul lavoro pubblicato nell' articolo \cite{Pisinger94}. Sono state utilizzate istanze di vario tipo: ``Strongly Correlated'', ``Weakly Correlated'', ``Uncorrelated'', ``Bounded Strongly Correlated'' e ``Subset Sum''. 
 
-I grafici riportati in ~\ref{fig:time_by_b} riportano gli andamenti dei tempi di enumerazione in funzione della capacità, in ~\ref{fig:time_by_k_fw}~\ref{fig:time_by_k_bw} sono invece in funzione di $K$. Infine in \ref{fig:time_by_nbk_fw}~\ref{fig:time_by_nbk_bw} sono riportati gli andamenti dei tempi in funzione di numero di variabili $n$,capacità $b$ e parametro $K$. In questi ultimi è possibile notare come la ricerca forward sia sensibilmente influenzata dai $b$ e $n$, mentre la ricerca backward lo sia maggiormente rispetto al parametro $K$.
+I grafici riportati in ~\ref{fig:time_by_b} riportano gli andamenti dei tempi di enumerazione in funzione della capacità, in ~\ref{fig:time_by_k_fw}~\ref{fig:time_by_k_bw} sono invece in funzione di $K$. Infine in \ref{fig:time_by_nbk_fw}~\ref{fig:time_by_nbk_bw} sono riportati gli andamenti dei tempi in funzione di numero di variabili $n$, capacità $b$ e parametro $K$. In questi ultimi è possibile notare come la ricerca forward sia sensibilmente influenzata dai $b$ e $n$, mentre la ricerca backward lo sia maggiormente rispetto al parametro $K$.
 
 \begin{figure}[!hb]
   \centering
@@ -217,13 +217,9 @@ I grafici riportati in ~\ref{fig:time_by_b} riportano gli andamenti dei tempi di
 
 \end{figure}
 
-
-
-%\appendix
-%\section{Appendice}
 \newpage
 \bibliographystyle{plain}
-\bibliography{biblio}
+\bibliography{biblio} 
 \end{document}
 
 

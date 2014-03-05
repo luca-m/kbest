@@ -183,28 +183,28 @@ Using the `plots.R` scripts:
 
 Using the [problem generator](http://www.diku.dk/~pisinger/codes.html) `generator_cli`:
 
-   Usage:
-      generator_cli n r type i S
-   
-   Parameters:
-      n: number of items
-      r: range of coefficients, 
-      type: 1=uncorrelated
-            2=weakly corr
-            3=strongly corr
-            4=inverse str.corr
-            5=almost str.corr
-            6=subset-sum
-            7=even-odd subset-sum
-            8=even-odd knapsack
-            9=uncorrelated, similar weights
-            11=Avis subset-sum
-            12=Avis knapsack
-            13=collapsing KP
-            14=bounded strongly corr
-            15=No small weights
-      i: instance no
-      S: number of tests in series (typically 1000)
+    Usage:
+       generator_cli n r type i S
+    
+    Parameters:
+       n: number of items
+       r: range of coefficients, 
+       type: 1=uncorrelated
+             2=weakly corr
+             3=strongly corr
+             4=inverse str.corr
+             5=almost str.corr
+             6=subset-sum
+             7=even-odd subset-sum
+             8=even-odd knapsack
+             9=uncorrelated, similar weights
+             11=Avis subset-sum
+             12=Avis knapsack
+             13=collapsing KP
+             14=bounded strongly corr
+             15=No small weights
+       i: instance no
+       S: number of tests in series (typically 1000)
 
 
 - - - - - - - - - - - - - - - -
