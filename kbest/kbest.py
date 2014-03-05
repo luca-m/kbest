@@ -496,14 +496,15 @@ class KBestSolver(object):
 
     forward_time_start=time.clock()
     self._forward()
+    self._builtInitKBest()
     forward_time_stop=time.clock()
     
     if LOGGER.isEnabledFor(logging.DEBUG):
-      #LOGGER.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
       logging.debug('Matrix after forward enumeration:\n{}'.format(self.M[1:,1:]))
+      logging.debug('backward: init kbest:\n{}'.format('\n'.join('supernode V={}, J={}, T={} '.format(x.V,x.J,x.T) for x in self.L) ))
     
     backward_time_start=time.clock()
-    self._backtrack()
+    self._recoverSol()
     backward_time_stop=time.clock()
     
     self.stats['forward']= (forward_time_stop-forward_time_start)
