@@ -211,7 +211,7 @@ namespace kbest{
           fim=true;
         }
       }
-      //L1.~SolutionList();
+      L1.~SolutionList();
     }
   }
 

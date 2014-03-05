@@ -97,7 +97,6 @@ namespace kbest{
   SolutionList::~SolutionList(){
     if (this->slist!=NULL){
       this->slist->clear();
-      //delete this->slist;
     }
   }
 
